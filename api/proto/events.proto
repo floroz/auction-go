@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package events;
+
+option go_package = "github.com/floroz/auction-system/internal/pb";
+
+import "google/protobuf/timestamp.proto";
+
+// BidPlaced event is published when a user places a bid on an item
+message BidPlaced {
+  string bid_id = 1;      // UUID of the bid
+  string item_id = 2;     // UUID of the item being bid on
+  string user_id = 3;     // UUID of the user placing the bid
+  int64 amount = 4;        // Bid amount in cents/micros (BIGINT)
+  google.protobuf.Timestamp timestamp = 5; // When the bid was placed
+}
+

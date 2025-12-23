@@ -41,3 +41,66 @@ test: ## Run tests
 tidy: ## Tidy go modules
 	go mod tidy
 
+.PHONY: install-protoc
+install-protoc: ## Install protoc compiler locally (project-only)
+	@if [ ! -f tools/protoc ]; then \
+		echo "Downloading protoc for macOS..."; \
+		mkdir -p tools; \
+		ARCH=$$(uname -m); \
+		if [ "$$ARCH" = "arm64" ]; then \
+			PROTOC_ARCH="osx-aarch_64"; \
+		else \
+			PROTOC_ARCH="osx-x86_64"; \
+		fi; \
+		curl -L --fail --show-error --cert-status https://github.com/protocolbuffers/protobuf/releases/download/v27.1/protoc-27.1-$$PROTOC_ARCH.zip -o tools/protoc.zip || \
+		curl -L --fail --show-error --insecure https://github.com/protocolbuffers/protobuf/releases/download/v27.1/protoc-27.1-$$PROTOC_ARCH.zip -o tools/protoc.zip; \
+		unzip -o tools/protoc.zip -d tools; \
+		chmod +x tools/bin/protoc; \
+		mv tools/bin/protoc tools/protoc; \
+		rm -f tools/protoc.zip; \
+		echo "protoc installed to tools/protoc"; \
+	else \
+		echo "protoc already installed"; \
+	fi
+
+.PHONY: install-protoc-plugins
+install-protoc-plugins: ## Install Go protobuf plugins
+	@if ! command -v protoc-gen-go >/dev/null 2>&1; then \
+		echo "Installing protoc-gen-go..."; \
+		go install google.golang.org/protobuf/cmd/protoc-gen-go@latest || \
+		(echo "Error: Failed to install protoc-gen-go. Please run manually:"; \
+		 echo "  go install google.golang.org/protobuf/cmd/protoc-gen-go@latest"; \
+		 exit 1); \
+	else \
+		echo "protoc-gen-go already installed"; \
+	fi
+	@if ! command -v protoc-gen-go-grpc >/dev/null 2>&1; then \
+		echo "Installing protoc-gen-go-grpc..."; \
+		go install google.golang.org/protobuf/cmd/protoc-gen-go-grpc@latest || \
+		(echo "Note: protoc-gen-go-grpc not installed (optional for gRPC)"; \
+		 echo "  Install with: go install google.golang.org/protobuf/cmd/protoc-gen-go-grpc@latest"); \
+	else \
+		echo "protoc-gen-go-grpc already installed"; \
+	fi
+
+.PHONY: proto-gen
+proto-gen: install-protoc ## Generate Go code from protobuf files
+	@if [ ! -f tools/protoc ]; then \
+		echo "Error: protoc not found. Run 'make install-protoc' first."; \
+		exit 1; \
+	fi
+	@if ! command -v protoc-gen-go >/dev/null 2>&1; then \
+		echo "Error: protoc-gen-go not found in PATH."; \
+		echo "Please install it with: go install google.golang.org/protobuf/cmd/protoc-gen-go@latest"; \
+		echo "Make sure $$HOME/go/bin (or $$GOPATH/bin) is in your PATH."; \
+		exit 1; \
+	fi
+	@mkdir -p internal/pb
+	tools/protoc \
+		--go_out=. \
+		--go_opt=module=github.com/floroz/auction-system \
+		--proto_path=api/proto \
+		--proto_path=tools/include \
+		api/proto/events.proto
+	@echo "Protobuf code generated in internal/pb/"
+
