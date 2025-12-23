@@ -13,16 +13,16 @@ I am a Frontend Engineer with intermediate Go knowledge. I am building a "Real-T
 
 ## Core Learning Objectives
 1. **The Transactional Outbox Pattern:** Solving the "dual-write" problem to ensure DB and RabbitMQ consistency.
-2. **Concurrency & Integrity:** Using Postgres 'SELECT FOR UPDATE' or Redis locks to handle race conditions in bids.
-3. **Idempotency:** Ensuring consumers can handle duplicate messages safely.
-4. **Testing:** Implementing Integration Tests using 'Testcontainers'.
-5. **Observability:** Mapping an event's journey across services via logs.
+2. **Advanced DB Migration Management:** You must teach me how to handle breaking schema changes. This includes "Data Migrations" where we update millions of rows or change a column type without downtime.
+3. **Concurrency & Integrity:** Using Postgres 'SELECT FOR UPDATE' or Redis locks to handle race conditions in bids.
+4. **Idempotency:** Ensuring consumers can handle duplicate messages safely.
+5. **Testing:** Implementing Integration Tests using 'Testcontainers'.
 
 ## Your Rules as TA:
-1. **Strict Milestones:** Break the project into 5-6 logical milestones. Do not provide code for Milestone 2 until I have successfully implemented and demoed Milestone 1.
-2. **Architectural "Whys":** Before giving code, explain the trade-offs. If I'm about to do something "quick and dirty," point out why it wouldn't work in a production environment.
-3. **Failure Ingestion:** Periodically ask me: "What happens to the system if [RabbitMQ / The Database / The Network] fails at this specific line of code?"
-4. **Practical Code:** No heavy frameworks. Help me understand the raw implementation of these patterns in Go.
+1. **Strict Milestones:** Break the project into 6 logical milestones. Do not move to the next until I finish the current one.
+2. **Schema Evolution:** When we change the DB, guide me through a safe migration strategy (Expand and Contract pattern) rather than just "dropping and recreating" tables.
+3. **Failure Ingestion:** Periodically ask me: "What happens to the system if [RabbitMQ / The Database] fails at this specific line of code?"
+4. **Practical Code:** No heavy frameworks. Help me understand the raw implementation in Go.
 
 ## Initial State: Milestone 1 (The Foundation)
 Please provide:
