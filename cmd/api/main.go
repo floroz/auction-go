@@ -3,7 +3,8 @@ package main
 import (
 	"context"
 	"fmt"
-	"log"
+	"log/slog"
+	"os"
 	"time"
 
 	"github.com/floroz/auction-system/internal/auction"
@@ -15,39 +16,48 @@ import (
 )
 
 func main() {
+	// Initialize structured logger
+	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
+	slog.SetDefault(logger)
+
 	ctx := context.Background()
 
 	// 1. Initialize Postgres Connection Pool
 	dbConfig, err := pgxpool.ParseConfig("postgres://user:password@localhost:5432/auction_db")
 	if err != nil {
-		log.Fatalf("Unable to parse database config: %v", err)
+		logger.Error("Unable to parse database config", "error", err)
+		os.Exit(1)
 	}
 
 	pool, err := pgxpool.NewWithConfig(ctx, dbConfig)
 	if err != nil {
-		log.Fatalf("Unable to create connection pool: %v", err)
+		logger.Error("Unable to create connection pool", "error", err)
+		os.Exit(1)
 	}
 	defer pool.Close()
 
 	if err := pool.Ping(ctx); err != nil {
-		log.Fatalf("Unable to ping database: %v", err)
+		logger.Error("Unable to ping database", "error", err)
+		os.Exit(1)
 	}
-	log.Println("✅ Postgres Connected")
+	logger.Info("Postgres Connected")
 
 	// 2. Check RabbitMQ
 	mq, err := amqp091.Dial("amqp://guest:guest@localhost:5672/")
 	if err != nil {
-		log.Fatalf("RabbitMQ failed: %v", err)
+		logger.Error("RabbitMQ failed", "error", err)
+		os.Exit(1)
 	}
 	defer mq.Close()
-	log.Println("✅ RabbitMQ Connected")
+	logger.Info("RabbitMQ Connected")
 
 	// 3. Check Redis
 	rdb := redis.NewClient(&redis.Options{Addr: "localhost:6379"})
 	if err := rdb.Ping(ctx).Err(); err != nil {
-		log.Fatalf("Redis failed: %v", err)
+		logger.Error("Redis failed", "error", err)
+		os.Exit(1)
 	}
-	log.Println("✅ Redis Connected")
+	logger.Info("Redis Connected")
 
 	// 4. Initialize Repositories (Infrastructure Layer)
 	// Set lock timeout to 3 seconds to prevent indefinite waiting
@@ -59,19 +69,19 @@ func main() {
 	// 5. Initialize Service (Domain Layer)
 	auctionService := auction.NewAuctionService(txManager, bidRepo, itemRepo, outboxRepo)
 
-	log.Println("✅ Services Initialized")
+	logger.Info("Services Initialized")
 
 	// 6. Demo: Create a test item and place a bid
-	if err := demoPlaceBid(ctx, pool, auctionService); err != nil {
-		log.Printf("Demo failed: %v", err)
+	if err := demoPlaceBid(ctx, pool, auctionService, logger); err != nil {
+		logger.Error("Demo failed", "error", err)
 	}
 
-	log.Println("Milestone 2: Transactional Outbox Pattern implemented.")
-	log.Println("Next: Implement the Outbox Relay worker to publish events to RabbitMQ.")
+	logger.Info("Milestone 2: Transactional Outbox Pattern implemented.")
+	logger.Info("Next: Implement the Outbox Relay worker to publish events to RabbitMQ.")
 }
 
 // demoPlaceBid demonstrates the PlaceBid functionality
-func demoPlaceBid(ctx context.Context, pool *pgxpool.Pool, service *auction.AuctionService) error {
+func demoPlaceBid(ctx context.Context, pool *pgxpool.Pool, service *auction.AuctionService, logger *slog.Logger) error {
 	// Create a test item
 	itemID := uuid.New()
 	query := `
@@ -90,7 +100,7 @@ func demoPlaceBid(ctx context.Context, pool *pgxpool.Pool, service *auction.Auct
 		return fmt.Errorf("failed to create test item: %w", err)
 	}
 
-	log.Printf("✅ Created test item: %s", itemID)
+	logger.Info("Created test item", "item_id", itemID)
 
 	// Place a bid
 	userID := uuid.New()
@@ -105,7 +115,7 @@ func demoPlaceBid(ctx context.Context, pool *pgxpool.Pool, service *auction.Auct
 		return fmt.Errorf("failed to place bid: %w", err)
 	}
 
-	log.Printf("✅ Bid placed successfully: ID=%s, Amount=%d", bid.ID, bid.Amount)
+	logger.Info("Bid placed successfully", "bid_id", bid.ID, "amount", bid.Amount)
 
 	// Verify the outbox event was created
 	var count int
@@ -114,7 +124,7 @@ func demoPlaceBid(ctx context.Context, pool *pgxpool.Pool, service *auction.Auct
 		return fmt.Errorf("failed to count outbox events: %w", err)
 	}
 
-	log.Printf("✅ Outbox events created: %d", count)
+	logger.Info("Outbox events created", "count", count)
 
 	return nil
 }
