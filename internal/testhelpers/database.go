@@ -96,22 +96,3 @@ func runMigrations(t *testing.T, pool *pgxpool.Pool, migrationsDir string) {
 
 	t.Logf("Migrations applied successfully from: %s", migrationsDir)
 }
-
-// CleanDatabase truncates all tables to reset state between tests
-// Useful when reusing a database across multiple tests
-func CleanDatabase(t *testing.T, pool *pgxpool.Pool) {
-	t.Helper()
-
-	ctx := context.Background()
-	queries := []string{
-		"TRUNCATE TABLE bids CASCADE",
-		"TRUNCATE TABLE items CASCADE",
-		"TRUNCATE TABLE outbox_events CASCADE",
-	}
-
-	for _, query := range queries {
-		_, err := pool.Exec(ctx, query)
-		require.NoError(t, err, "Failed to truncate table: %s", query)
-	}
-}
-
