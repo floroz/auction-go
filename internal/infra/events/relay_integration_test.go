@@ -1,0 +1,130 @@
+package events_test
+
+import (
+	"context"
+	"log/slog"
+	"os"
+	"testing"
+	"time"
+
+	"github.com/floroz/auction-system/internal/auction"
+	"github.com/floroz/auction-system/internal/infra/database"
+	"github.com/floroz/auction-system/internal/infra/events"
+	"github.com/floroz/auction-system/internal/testhelpers"
+	"github.com/google/uuid"
+	"github.com/rabbitmq/amqp091-go"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	"github.com/testcontainers/testcontainers-go/modules/rabbitmq"
+)
+
+// TestRelayIntegrationWithRabbitMQ runs a full integration test with a real RabbitMQ container
+func TestRelayIntegrationWithRabbitMQ(t *testing.T) {
+	if testing.Short() {
+		t.Skip("Skipping integration test in short mode")
+	}
+
+	ctx := context.Background()
+
+	// 1. Start RabbitMQ Container
+	rabbitmqContainer, err := rabbitmq.Run(ctx,
+		"rabbitmq:3.12-management-alpine",
+		rabbitmq.WithAdminPassword("password"),
+	)
+	require.NoError(t, err)
+	defer func() {
+		if err := rabbitmqContainer.Terminate(ctx); err != nil {
+			t.Fatalf("failed to terminate container: %s", err)
+		}
+	}()
+
+	amqpURL, err := rabbitmqContainer.AmqpURL(ctx)
+	require.NoError(t, err)
+
+	// 2. Setup Postgres
+	// Path to migrations directory relative to this test file
+	testDB := testhelpers.NewTestDatabase(t, "../../../migrations")
+	defer testDB.Close()
+	dbPool := testDB.Pool
+
+	// 3. Setup Relay Components
+	rabbitPublisher, err := events.NewRabbitMQPublisher(amqpURL)
+	require.NoError(t, err)
+	defer rabbitPublisher.Close()
+
+	txManager := database.NewPostgresTransactionManager(dbPool, time.Second)
+	outboxRepo := database.NewPostgresOutboxRepository(dbPool)
+	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
+
+	relay := events.NewOutboxRelay(
+		outboxRepo,
+		rabbitPublisher,
+		txManager,
+		10,
+		50*time.Millisecond,
+		logger,
+	)
+
+	// 4. Create a separate RabbitMQ consumer to verify message delivery
+	conn, err := amqp091.Dial(amqpURL)
+	require.NoError(t, err)
+	defer conn.Close()
+
+	ch, err := conn.Channel()
+	require.NoError(t, err)
+	defer ch.Close()
+
+	// Ensure queue matches what the publisher expects (or bind a queue to the exchange)
+	err = ch.ExchangeDeclare("auction.events", "topic", true, false, false, false, nil)
+	require.NoError(t, err)
+
+	q, err := ch.QueueDeclare("", false, false, true, false, nil)
+	require.NoError(t, err)
+
+	err = ch.QueueBind(q.Name, "bid.placed", "auction.events", false, nil)
+	require.NoError(t, err)
+
+	msgs, err := ch.Consume(q.Name, "", true, false, false, false, nil)
+	require.NoError(t, err)
+
+	// 5. Seed Data
+	eventID := uuid.New()
+	expectedPayload := []byte(`{"test":"integration"}`)
+	query := `
+		INSERT INTO outbox_events (id, event_type, payload, status, created_at)
+		VALUES ($1, $2, $3, $4, $5)
+	`
+	_, err = dbPool.Exec(ctx, query,
+		eventID,
+		auction.EventTypeBidPlaced,
+		expectedPayload,
+		auction.OutboxStatusPending,
+		time.Now(),
+	)
+	require.NoError(t, err)
+
+	// 6. Run Relay
+	ctxRelay, cancelRelay := context.WithCancel(ctx)
+	go relay.Run(ctxRelay)
+	defer cancelRelay()
+
+	// 7. Verify Message Receipt in RabbitMQ
+	select {
+	case msg := <-msgs:
+		assert.Equal(t, expectedPayload, msg.Body)
+		assert.Equal(t, "bid.placed", msg.RoutingKey)
+	case <-time.After(10 * time.Second):
+		t.Fatal("Timeout waiting for message from RabbitMQ")
+	}
+
+	// 8. Verify DB Update
+	// Wait a moment for the DB update to commit
+	require.Eventually(t, func() bool {
+		var status string
+		err = dbPool.QueryRow(ctx, "SELECT status FROM outbox_events WHERE id = $1", eventID).Scan(&status)
+		if err != nil {
+			return false
+		}
+		return status == string(auction.OutboxStatusPublished)
+	}, 2*time.Second, 100*time.Millisecond, "Event status should be updated to 'published'")
+}
