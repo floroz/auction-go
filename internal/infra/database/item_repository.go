@@ -4,13 +4,13 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/floroz/auction-system/internal/auction"
+	"github.com/floroz/auction-system/internal/bids"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-// PostgresItemRepository implements auction.ItemRepository using pgx
+// PostgresItemRepository implements bids.ItemRepository using pgx
 type PostgresItemRepository struct {
 	pool *pgxpool.Pool // Keep pool for non-transactional reads
 }
@@ -21,18 +21,18 @@ func NewPostgresItemRepository(pool *pgxpool.Pool) *PostgresItemRepository {
 }
 
 // GetItemByID retrieves an item by its ID (non-transactional read)
-func (r *PostgresItemRepository) GetItemByID(ctx context.Context, itemID uuid.UUID) (*auction.Item, error) {
+func (r *PostgresItemRepository) GetItemByID(ctx context.Context, itemID uuid.UUID) (*bids.Item, error) {
 	return r.getItemByID(ctx, r.pool, itemID, false)
 }
 
 // GetItemByIDForUpdate retrieves an item by its ID and locks it for update (transactional)
 // This prevents race conditions when multiple users bid on the same item
-func (r *PostgresItemRepository) GetItemByIDForUpdate(ctx context.Context, tx pgx.Tx, itemID uuid.UUID) (*auction.Item, error) {
+func (r *PostgresItemRepository) GetItemByIDForUpdate(ctx context.Context, tx pgx.Tx, itemID uuid.UUID) (*bids.Item, error) {
 	return r.getItemByID(ctx, tx, itemID, true)
 }
 
 // getItemByID is the internal implementation that works with any DBTX
-func (r *PostgresItemRepository) getItemByID(ctx context.Context, db DBTX, itemID uuid.UUID, forUpdate bool) (*auction.Item, error) {
+func (r *PostgresItemRepository) getItemByID(ctx context.Context, db DBTX, itemID uuid.UUID, forUpdate bool) (*bids.Item, error) {
 	query := `
 		SELECT id, title, description, start_price, current_highest_bid, end_at, created_at, updated_at
 		FROM items
@@ -42,7 +42,7 @@ func (r *PostgresItemRepository) getItemByID(ctx context.Context, db DBTX, itemI
 		query += " FOR UPDATE"
 	}
 
-	var item auction.Item
+	var item bids.Item
 	err := db.QueryRow(ctx, query, itemID).Scan(
 		&item.ID,
 		&item.Title,

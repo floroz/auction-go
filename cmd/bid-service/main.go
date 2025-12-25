@@ -7,7 +7,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/floroz/auction-system/internal/auction"
+	"github.com/floroz/auction-system/internal/bids"
 	"github.com/floroz/auction-system/internal/infra/database"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -67,7 +67,7 @@ func main() {
 	outboxRepo := database.NewPostgresOutboxRepository(pool)
 
 	// 5. Initialize Service (Domain Layer)
-	auctionService := auction.NewAuctionService(txManager, bidRepo, itemRepo, outboxRepo)
+	auctionService := bids.NewAuctionService(txManager, bidRepo, itemRepo, outboxRepo)
 
 	logger.Info("Services Initialized")
 
@@ -81,7 +81,7 @@ func main() {
 }
 
 // demoPlaceBid demonstrates the PlaceBid functionality
-func demoPlaceBid(ctx context.Context, pool *pgxpool.Pool, service *auction.AuctionService, logger *slog.Logger) error {
+func demoPlaceBid(ctx context.Context, pool *pgxpool.Pool, service *bids.AuctionService, logger *slog.Logger) error {
 	// Create a test item
 	itemID := uuid.New()
 	query := `
@@ -104,7 +104,7 @@ func demoPlaceBid(ctx context.Context, pool *pgxpool.Pool, service *auction.Auct
 
 	// Place a bid
 	userID := uuid.New()
-	cmd := auction.PlaceBidCommand{
+	cmd := bids.PlaceBidCommand{
 		ItemID: itemID,
 		UserID: userID,
 		Amount: int64(15000), // $150.00
@@ -119,7 +119,7 @@ func demoPlaceBid(ctx context.Context, pool *pgxpool.Pool, service *auction.Auct
 
 	// Verify the outbox event was created
 	var count int
-	err = pool.QueryRow(ctx, "SELECT COUNT(*) FROM outbox_events WHERE event_type = $1", auction.EventTypeBidPlaced).Scan(&count)
+	err = pool.QueryRow(ctx, "SELECT COUNT(*) FROM outbox_events WHERE event_type = $1", bids.EventTypeBidPlaced).Scan(&count)
 	if err != nil {
 		return fmt.Errorf("failed to count outbox events: %w", err)
 	}

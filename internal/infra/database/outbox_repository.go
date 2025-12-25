@@ -5,13 +5,13 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/floroz/auction-system/internal/auction"
+	"github.com/floroz/auction-system/internal/bids"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-// PostgresOutboxRepository implements auction.OutboxRepository using pgx
+// PostgresOutboxRepository implements bids.OutboxRepository using pgx
 type PostgresOutboxRepository struct {
 	pool *pgxpool.Pool
 }
@@ -22,7 +22,7 @@ func NewPostgresOutboxRepository(pool *pgxpool.Pool) *PostgresOutboxRepository {
 }
 
 // SaveEvent saves an outbox event within a transaction
-func (r *PostgresOutboxRepository) SaveEvent(ctx context.Context, tx pgx.Tx, event *auction.OutboxEvent) error {
+func (r *PostgresOutboxRepository) SaveEvent(ctx context.Context, tx pgx.Tx, event *bids.OutboxEvent) error {
 	query := `
 		INSERT INTO outbox_events (id, event_type, payload, status, created_at)
 		VALUES ($1, $2, $3, $4, $5)
@@ -42,7 +42,7 @@ func (r *PostgresOutboxRepository) SaveEvent(ctx context.Context, tx pgx.Tx, eve
 
 // GetPendingEvents retrieves pending events for processing
 // Uses SELECT FOR UPDATE SKIP LOCKED to prevent multiple workers from processing the same event
-func (r *PostgresOutboxRepository) GetPendingEvents(ctx context.Context, tx pgx.Tx, limit int) ([]*auction.OutboxEvent, error) {
+func (r *PostgresOutboxRepository) GetPendingEvents(ctx context.Context, tx pgx.Tx, limit int) ([]*bids.OutboxEvent, error) {
 	query := `
 		SELECT id, event_type, payload, status, created_at, processed_at
 		FROM outbox_events
@@ -52,15 +52,15 @@ func (r *PostgresOutboxRepository) GetPendingEvents(ctx context.Context, tx pgx.
 		FOR UPDATE SKIP LOCKED
 	`
 
-	rows, err := tx.Query(ctx, query, auction.OutboxStatusPending, limit)
+	rows, err := tx.Query(ctx, query, bids.OutboxStatusPending, limit)
 	if err != nil {
 		return nil, fmt.Errorf("failed to query pending events: %w", err)
 	}
 	defer rows.Close()
 
-	var events []*auction.OutboxEvent
+	var events []*bids.OutboxEvent
 	for rows.Next() {
-		var event auction.OutboxEvent
+		var event bids.OutboxEvent
 		var processedAt *time.Time
 
 		if err := rows.Scan(
@@ -86,7 +86,7 @@ func (r *PostgresOutboxRepository) GetPendingEvents(ctx context.Context, tx pgx.
 }
 
 // UpdateEventStatus updates the status of an event
-func (r *PostgresOutboxRepository) UpdateEventStatus(ctx context.Context, tx pgx.Tx, eventID uuid.UUID, status auction.OutboxStatus) error {
+func (r *PostgresOutboxRepository) UpdateEventStatus(ctx context.Context, tx pgx.Tx, eventID uuid.UUID, status bids.OutboxStatus) error {
 	query := `
 		UPDATE outbox_events
 		SET status = $1, processed_at = $2
@@ -94,7 +94,7 @@ func (r *PostgresOutboxRepository) UpdateEventStatus(ctx context.Context, tx pgx
 	`
 
 	var processedAt *time.Time
-	if status == auction.OutboxStatusPublished || status == auction.OutboxStatusFailed {
+	if status == bids.OutboxStatusPublished || status == bids.OutboxStatusFailed {
 		now := time.Now()
 		processedAt = &now
 	}

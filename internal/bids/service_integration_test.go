@@ -1,4 +1,4 @@
-package auction_test
+package bids_test
 
 import (
 	"context"
@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/floroz/auction-system/internal/auction"
+	"github.com/floroz/auction-system/internal/bids"
 	infradb "github.com/floroz/auction-system/internal/infra/database"
 	"github.com/floroz/auction-system/internal/pkg/database"
 	"github.com/floroz/auction-system/internal/testhelpers"
@@ -17,7 +17,7 @@ import (
 )
 
 // seedTestItem inserts a test item into the database
-func seedTestItem(t *testing.T, pool *pgxpool.Pool, item *auction.Item) {
+func seedTestItem(t *testing.T, pool *pgxpool.Pool, item *bids.Item) {
 	t.Helper()
 	ctx := context.Background()
 	query := `
@@ -39,11 +39,11 @@ func seedTestItem(t *testing.T, pool *pgxpool.Pool, item *auction.Item) {
 
 // testServices holds all service dependencies for testing
 type testServices struct {
-	Service    *auction.AuctionService
+	Service    *bids.AuctionService
 	TxManager  database.TransactionManager
-	BidRepo    auction.BidRepository
-	ItemRepo   auction.ItemRepository
-	OutboxRepo auction.OutboxRepository
+	BidRepo    bids.BidRepository
+	ItemRepo   bids.ItemRepository
+	OutboxRepo bids.OutboxRepository
 }
 
 // setupAuctionService creates a service with all its dependencies for testing
@@ -52,7 +52,7 @@ func setupAuctionService(pool *pgxpool.Pool) *testServices {
 	bidRepo := infradb.NewPostgresBidRepository(pool)
 	itemRepo := infradb.NewPostgresItemRepository(pool)
 	outboxRepo := infradb.NewPostgresOutboxRepository(pool)
-	service := auction.NewAuctionService(txManager, bidRepo, itemRepo, outboxRepo)
+	service := bids.NewAuctionService(txManager, bidRepo, itemRepo, outboxRepo)
 
 	return &testServices{
 		Service:    service,
@@ -75,7 +75,7 @@ func TestAuctionService_PlaceBid_Success(t *testing.T) {
 	// Seed test data: Create an auction item
 	itemID := uuid.New()
 	userID := uuid.New()
-	testItem := &auction.Item{
+	testItem := &bids.Item{
 		ID:                itemID,
 		Title:             "Vintage Guitar",
 		Description:       "A beautiful 1960s guitar",
@@ -89,7 +89,7 @@ func TestAuctionService_PlaceBid_Success(t *testing.T) {
 
 	// Test: Place a valid bid
 	ctx := context.Background()
-	cmd := auction.PlaceBidCommand{
+	cmd := bids.PlaceBidCommand{
 		ItemID: itemID,
 		UserID: userID,
 		Amount: 150000, // $1500.00 in cents
@@ -126,8 +126,8 @@ func TestAuctionService_PlaceBid_Success(t *testing.T) {
 	require.Len(t, events, 1, "Should have exactly one outbox event")
 
 	event := events[0]
-	assert.Equal(t, auction.EventTypeBidPlaced, event.EventType)
-	assert.Equal(t, auction.OutboxStatusPending, event.Status)
+	assert.Equal(t, bids.EventTypeBidPlaced, event.EventType)
+	assert.Equal(t, bids.OutboxStatusPending, event.Status)
 	assert.NotEmpty(t, event.Payload, "Event payload should not be empty")
 }
 
@@ -142,7 +142,7 @@ func TestAuctionService_PlaceBid_ItemNotFound(t *testing.T) {
 
 	// No item seeded - item doesn't exist
 	ctx := context.Background()
-	cmd := auction.PlaceBidCommand{
+	cmd := bids.PlaceBidCommand{
 		ItemID: uuid.New(), // Non-existent item
 		UserID: uuid.New(),
 		Amount: 150000,
@@ -168,7 +168,7 @@ func TestAuctionService_PlaceBid_BidTooLow(t *testing.T) {
 
 	// Seed item with existing high bid
 	itemID := uuid.New()
-	testItem := &auction.Item{
+	testItem := &bids.Item{
 		ID:                itemID,
 		Title:             "Expensive Watch",
 		Description:       "Luxury timepiece",
@@ -182,7 +182,7 @@ func TestAuctionService_PlaceBid_BidTooLow(t *testing.T) {
 
 	// Try to place a lower bid
 	ctx := context.Background()
-	cmd := auction.PlaceBidCommand{
+	cmd := bids.PlaceBidCommand{
 		ItemID: itemID,
 		UserID: uuid.New(),
 		Amount: 90000, // $900 - lower than current bid
@@ -194,7 +194,7 @@ func TestAuctionService_PlaceBid_BidTooLow(t *testing.T) {
 	// Assert
 	require.Error(t, err)
 	assert.Nil(t, bid)
-	assert.ErrorIs(t, err, auction.ErrBidTooLow)
+	assert.ErrorIs(t, err, bids.ErrBidTooLow)
 
 	// Verify: No bid was saved
 	bids, err := svc.BidRepo.GetBidsByItemID(ctx, itemID)
@@ -220,7 +220,7 @@ func TestAuctionService_PlaceBid_BidEqualToCurrent(t *testing.T) {
 
 	// Seed item
 	itemID := uuid.New()
-	testItem := &auction.Item{
+	testItem := &bids.Item{
 		ID:                itemID,
 		Title:             "Rare Coin",
 		StartPrice:        50000,
@@ -233,7 +233,7 @@ func TestAuctionService_PlaceBid_BidEqualToCurrent(t *testing.T) {
 
 	// Try to place equal bid
 	ctx := context.Background()
-	cmd := auction.PlaceBidCommand{
+	cmd := bids.PlaceBidCommand{
 		ItemID: itemID,
 		UserID: uuid.New(),
 		Amount: bidAmount,
@@ -245,7 +245,7 @@ func TestAuctionService_PlaceBid_BidEqualToCurrent(t *testing.T) {
 	// Assert
 	require.Error(t, err)
 	assert.Nil(t, bid)
-	assert.ErrorIs(t, err, auction.ErrBidTooLow)
+	assert.ErrorIs(t, err, bids.ErrBidTooLow)
 }
 
 // TestAuctionService_PlaceBid_AuctionEnded tests business rule validation
@@ -259,7 +259,7 @@ func TestAuctionService_PlaceBid_AuctionEnded(t *testing.T) {
 
 	// Seed item that already ended
 	itemID := uuid.New()
-	testItem := &auction.Item{
+	testItem := &bids.Item{
 		ID:                itemID,
 		Title:             "Expired Auction",
 		Description:       "This auction has ended",
@@ -273,7 +273,7 @@ func TestAuctionService_PlaceBid_AuctionEnded(t *testing.T) {
 
 	// Try to place a bid
 	ctx := context.Background()
-	cmd := auction.PlaceBidCommand{
+	cmd := bids.PlaceBidCommand{
 		ItemID: itemID,
 		UserID: uuid.New(),
 		Amount: 100000, // Higher than current bid
@@ -285,7 +285,7 @@ func TestAuctionService_PlaceBid_AuctionEnded(t *testing.T) {
 	// Assert
 	require.Error(t, err)
 	assert.Nil(t, bid)
-	assert.ErrorIs(t, err, auction.ErrAuctionEnded)
+	assert.ErrorIs(t, err, bids.ErrAuctionEnded)
 
 	// Verify: No bid was saved
 	bids, err := svc.BidRepo.GetBidsByItemID(ctx, itemID)
@@ -309,7 +309,7 @@ func TestAuctionService_PlaceBid_RejectLowerBid(t *testing.T) {
 
 	// Seed item
 	itemID := uuid.New()
-	testItem := &auction.Item{
+	testItem := &bids.Item{
 		ID:                itemID,
 		Title:             "Test Item",
 		StartPrice:        50000,
@@ -323,7 +323,7 @@ func TestAuctionService_PlaceBid_RejectLowerBid(t *testing.T) {
 	ctx := context.Background()
 
 	// Place first bid successfully
-	cmd1 := auction.PlaceBidCommand{
+	cmd1 := bids.PlaceBidCommand{
 		ItemID: itemID,
 		UserID: uuid.New(),
 		Amount: 100000,
@@ -333,7 +333,7 @@ func TestAuctionService_PlaceBid_RejectLowerBid(t *testing.T) {
 	require.NotNil(t, bid1)
 
 	// Try to place a lower bid (should fail validation)
-	cmd2 := auction.PlaceBidCommand{
+	cmd2 := bids.PlaceBidCommand{
 		ItemID: itemID,
 		UserID: uuid.New(),
 		Amount: 90000, // Too low
@@ -374,7 +374,7 @@ func TestAuctionService_PlaceBid_ConcurrentBids_Atomicity(t *testing.T) {
 
 	// Seed item
 	itemID := uuid.New()
-	testItem := &auction.Item{
+	testItem := &bids.Item{
 		ID:                itemID,
 		Title:             "Test Item",
 		StartPrice:        50000,
@@ -397,7 +397,7 @@ func TestAuctionService_PlaceBid_ConcurrentBids_Atomicity(t *testing.T) {
 		wg.Add(1)
 		go func(bidAmount int64) {
 			defer wg.Done()
-			cmd := auction.PlaceBidCommand{
+			cmd := bids.PlaceBidCommand{
 				ItemID: itemID,
 				UserID: uuid.New(),
 				Amount: bidAmount,
@@ -473,7 +473,7 @@ func TestAuctionService_PlaceBid_RaceCondition_SameAmount(t *testing.T) {
 	svc := setupAuctionService(pool)
 
 	itemID := uuid.New()
-	testItem := &auction.Item{
+	testItem := &bids.Item{
 		ID:                itemID,
 		Title:             "Test Item",
 		StartPrice:        50000,
@@ -494,7 +494,7 @@ func TestAuctionService_PlaceBid_RaceCondition_SameAmount(t *testing.T) {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			cmd := auction.PlaceBidCommand{
+			cmd := bids.PlaceBidCommand{
 				ItemID: itemID,
 				UserID: uuid.New(),
 				Amount: 100000, // SAME amount

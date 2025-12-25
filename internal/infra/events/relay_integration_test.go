@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/floroz/auction-system/internal/auction"
+	"github.com/floroz/auction-system/internal/bids"
 	"github.com/floroz/auction-system/internal/infra/database"
 	"github.com/floroz/auction-system/internal/infra/events"
 	"github.com/floroz/auction-system/internal/testhelpers"
@@ -75,13 +75,13 @@ func TestRelayIntegrationWithRabbitMQ(t *testing.T) {
 	defer ch.Close()
 
 	// Ensure queue matches what the publisher expects (or bind a queue to the exchange)
-	err = ch.ExchangeDeclare("auction.events", "topic", true, false, false, false, nil)
+	err = ch.ExchangeDeclare("bids.events", "topic", true, false, false, false, nil)
 	require.NoError(t, err)
 
 	q, err := ch.QueueDeclare("", false, false, true, false, nil)
 	require.NoError(t, err)
 
-	err = ch.QueueBind(q.Name, "bid.placed", "auction.events", false, nil)
+	err = ch.QueueBind(q.Name, "bid.placed", "bids.events", false, nil)
 	require.NoError(t, err)
 
 	msgs, err := ch.Consume(q.Name, "", true, false, false, false, nil)
@@ -96,9 +96,9 @@ func TestRelayIntegrationWithRabbitMQ(t *testing.T) {
 	`
 	_, err = dbPool.Exec(ctx, query,
 		eventID,
-		auction.EventTypeBidPlaced,
+		bids.EventTypeBidPlaced,
 		expectedPayload,
-		auction.OutboxStatusPending,
+		bids.OutboxStatusPending,
 		time.Now(),
 	)
 	require.NoError(t, err)
@@ -125,6 +125,6 @@ func TestRelayIntegrationWithRabbitMQ(t *testing.T) {
 		if err != nil {
 			return false
 		}
-		return status == string(auction.OutboxStatusPublished)
+		return status == string(bids.OutboxStatusPublished)
 	}, 2*time.Second, 100*time.Millisecond, "Event status should be updated to 'published'")
 }

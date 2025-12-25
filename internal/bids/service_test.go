@@ -1,4 +1,4 @@
-package auction
+package bids
 
 import (
 	"testing"

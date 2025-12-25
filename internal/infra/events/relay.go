@@ -6,14 +6,14 @@ import (
 	"log/slog"
 	"time"
 
-	"github.com/floroz/auction-system/internal/auction"
+	"github.com/floroz/auction-system/internal/bids"
 	"github.com/floroz/auction-system/internal/pkg/database"
 )
 
 // OutboxRelay polls the database for pending events and publishes them
 type OutboxRelay struct {
-	outboxRepo auction.OutboxRepository
-	publisher  auction.EventPublisher
+	outboxRepo bids.OutboxRepository
+	publisher  bids.EventPublisher
 	txManager  database.TransactionManager
 	batchSize  int
 	interval   time.Duration
@@ -22,8 +22,8 @@ type OutboxRelay struct {
 
 // NewOutboxRelay creates a new outbox relay
 func NewOutboxRelay(
-	outboxRepo auction.OutboxRepository,
-	publisher auction.EventPublisher,
+	outboxRepo bids.OutboxRepository,
+	publisher bids.EventPublisher,
 	txManager database.TransactionManager,
 	batchSize int,
 	interval time.Duration,
@@ -82,9 +82,9 @@ func (r *OutboxRelay) processBatch(ctx context.Context) error {
 
 	for _, event := range events {
 		// Publish to RabbitMQ
-		// Exchange: auction.events
+		// Exchange: bids.events
 		// Routing Key: event_type (e.g., "bid.placed")
-		err := r.publisher.Publish(ctx, "auction.events", string(event.EventType), event.Payload)
+		err := r.publisher.Publish(ctx, "bids.events", string(event.EventType), event.Payload)
 		if err != nil {
 			// If publishing fails, we return error and the transaction rolls back.
 			// The event remains 'pending' and will be retried.
@@ -92,7 +92,7 @@ func (r *OutboxRelay) processBatch(ctx context.Context) error {
 		}
 
 		// Update status in DB
-		err = r.outboxRepo.UpdateEventStatus(ctx, tx, event.ID, auction.OutboxStatusPublished)
+		err = r.outboxRepo.UpdateEventStatus(ctx, tx, event.ID, bids.OutboxStatusPublished)
 		if err != nil {
 			return fmt.Errorf("failed to update event status %s: %w", event.ID, err)
 		}
