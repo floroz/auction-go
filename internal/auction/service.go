@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/floroz/auction-system/internal/pb"
+	"github.com/floroz/auction-system/internal/pkg/database"
 	"github.com/google/uuid"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/timestamppb"
@@ -35,7 +36,7 @@ func validateAuctionNotEnded(endAt time.Time) error {
 
 // AuctionService implements the core business logic
 type AuctionService struct {
-	txManager  TransactionManager
+	txManager  database.TransactionManager
 	bidRepo    BidRepository
 	itemRepo   ItemRepository
 	outboxRepo OutboxRepository
@@ -43,7 +44,7 @@ type AuctionService struct {
 
 // NewAuctionService creates a new auction service
 func NewAuctionService(
-	txManager TransactionManager,
+	txManager database.TransactionManager,
 	bidRepo BidRepository,
 	itemRepo ItemRepository,
 	outboxRepo OutboxRepository,

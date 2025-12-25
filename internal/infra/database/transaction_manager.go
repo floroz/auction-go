@@ -9,7 +9,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-// PostgresTransactionManager implements auction.TransactionManager using pgx
+// PostgresTransactionManager implements database.TransactionManager using pgx
 type PostgresTransactionManager struct {
 	pool        *pgxpool.Pool
 	lockTimeout time.Duration

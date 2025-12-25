@@ -4,24 +4,19 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/jackc/pgx/v5"
+	"github.com/floroz/auction-system/internal/pkg/database"
 )
 
 type UserStatsService struct {
 	repo      UserStatsRepository
-	txManager TransactionManager
+	txManager database.TransactionManager
 }
 
-func NewUserStatsService(repo UserStatsRepository, txManager TransactionManager) *UserStatsService {
+func NewUserStatsService(repo UserStatsRepository, txManager database.TransactionManager) *UserStatsService {
 	return &UserStatsService{
 		repo:      repo,
 		txManager: txManager,
 	}
-}
-
-// TransactionManager defines the interface for managing database transactions
-type TransactionManager interface {
-	BeginTx(ctx context.Context) (pgx.Tx, error)
 }
 
 func (s *UserStatsService) ProcessBidPlaced(ctx context.Context, event BidPlacedEvent) error {

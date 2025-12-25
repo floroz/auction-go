@@ -7,13 +7,14 @@ import (
 	"time"
 
 	"github.com/floroz/auction-system/internal/auction"
+	"github.com/floroz/auction-system/internal/pkg/database"
 )
 
 // OutboxRelay polls the database for pending events and publishes them
 type OutboxRelay struct {
 	outboxRepo auction.OutboxRepository
 	publisher  auction.EventPublisher
-	txManager  auction.TransactionManager
+	txManager  database.TransactionManager
 	batchSize  int
 	interval   time.Duration
 	logger     *slog.Logger
@@ -23,7 +24,7 @@ type OutboxRelay struct {
 func NewOutboxRelay(
 	outboxRepo auction.OutboxRepository,
 	publisher auction.EventPublisher,
-	txManager auction.TransactionManager,
+	txManager database.TransactionManager,
 	batchSize int,
 	interval time.Duration,
 	logger *slog.Logger,

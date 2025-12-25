@@ -46,12 +46,6 @@ type ItemRepository interface {
 	UpdateHighestBid(ctx context.Context, tx pgx.Tx, itemID uuid.UUID, amount int64) error
 }
 
-// TransactionManager defines the interface for managing database transactions
-type TransactionManager interface {
-	// BeginTx starts a new transaction
-	BeginTx(ctx context.Context) (pgx.Tx, error)
-}
-
 // EventPublisher defines the interface for publishing events to a message broker
 type EventPublisher interface {
 	// Publish publishes a message to the broker

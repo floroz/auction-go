@@ -7,7 +7,8 @@ import (
 	"time"
 
 	"github.com/floroz/auction-system/internal/auction"
-	"github.com/floroz/auction-system/internal/infra/database"
+	infradb "github.com/floroz/auction-system/internal/infra/database"
+	"github.com/floroz/auction-system/internal/pkg/database"
 	"github.com/floroz/auction-system/internal/testhelpers"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -39,7 +40,7 @@ func seedTestItem(t *testing.T, pool *pgxpool.Pool, item *auction.Item) {
 // testServices holds all service dependencies for testing
 type testServices struct {
 	Service    *auction.AuctionService
-	TxManager  auction.TransactionManager
+	TxManager  database.TransactionManager
 	BidRepo    auction.BidRepository
 	ItemRepo   auction.ItemRepository
 	OutboxRepo auction.OutboxRepository
@@ -47,10 +48,10 @@ type testServices struct {
 
 // setupAuctionService creates a service with all its dependencies for testing
 func setupAuctionService(pool *pgxpool.Pool) *testServices {
-	txManager := database.NewPostgresTransactionManager(pool, 5*time.Second)
-	bidRepo := database.NewPostgresBidRepository(pool)
-	itemRepo := database.NewPostgresItemRepository(pool)
-	outboxRepo := database.NewPostgresOutboxRepository(pool)
+	txManager := infradb.NewPostgresTransactionManager(pool, 5*time.Second)
+	bidRepo := infradb.NewPostgresBidRepository(pool)
+	itemRepo := infradb.NewPostgresItemRepository(pool)
+	outboxRepo := infradb.NewPostgresOutboxRepository(pool)
 	service := auction.NewAuctionService(txManager, bidRepo, itemRepo, outboxRepo)
 
 	return &testServices{
