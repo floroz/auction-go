@@ -3,6 +3,7 @@ package database
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/floroz/auction-system/internal/userstats"
 	"github.com/google/uuid"
@@ -18,26 +19,24 @@ func NewUserStatsRepository(pool *pgxpool.Pool) *UserStatsRepository {
 	return &UserStatsRepository{pool: pool}
 }
 
-func (r *UserStatsRepository) SaveUserStats(ctx context.Context, tx pgx.Tx, userStats *userstats.UserStats) error {
+// IncrementUserStats increments the user's bid stats atomically
+func (r *UserStatsRepository) IncrementUserStats(ctx context.Context, tx pgx.Tx, userID uuid.UUID, amount int64, lastBidAt time.Time) error {
 	query := `
 		INSERT INTO user_stats (user_id, total_bids_placed, total_amount_bid, last_bid_at, created_at, updated_at)
-		VALUES ($1, $2, $3, $4, $5, $6)
+		VALUES ($1, 1, $2, $3, NOW(), NOW())
 		ON CONFLICT (user_id) DO UPDATE SET
-			total_bids_placed = user_stats.total_bids_placed + EXCLUDED.total_bids_placed,
+			total_bids_placed = user_stats.total_bids_placed + 1,
 			total_amount_bid = user_stats.total_amount_bid + EXCLUDED.total_amount_bid,
 			last_bid_at = EXCLUDED.last_bid_at,
 			updated_at = NOW()
 	`
 	_, err := tx.Exec(ctx, query,
-		userStats.UserID,
-		userStats.TotalBidsPlaced,
-		userStats.TotalAmountBid,
-		userStats.LastBidAt,
-		userStats.CreatedAt,
-		userStats.UpdatedAt,
+		userID,    // $1
+		amount,    // $2
+		lastBidAt, // $3
 	)
 	if err != nil {
-		return fmt.Errorf("failed to upsert user stats: %w", err)
+		return fmt.Errorf("failed to increment user stats: %w", err)
 	}
 	return nil
 }
