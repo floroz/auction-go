@@ -7,12 +7,13 @@ import (
 	"os"
 	"time"
 
-	"github.com/floroz/auction-system/internal/bids"
-	"github.com/floroz/auction-system/internal/infra/database"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/rabbitmq/amqp091-go"
 	"github.com/redis/go-redis/v9"
+
+	"github.com/floroz/auction-system/internal/bids"
+	"github.com/floroz/auction-system/internal/infra/database"
 )
 
 func main() {
@@ -36,8 +37,8 @@ func main() {
 	}
 	defer pool.Close()
 
-	if err := pool.Ping(ctx); err != nil {
-		logger.Error("Unable to ping database", "error", err)
+	if pingErr := pool.Ping(ctx); pingErr != nil {
+		logger.Error("Unable to ping database", "error", pingErr)
 		os.Exit(1)
 	}
 	logger.Info("Postgres Connected")

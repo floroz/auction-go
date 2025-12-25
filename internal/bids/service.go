@@ -5,11 +5,12 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/floroz/auction-system/internal/pb"
-	"github.com/floroz/auction-system/internal/pkg/database"
 	"github.com/google/uuid"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/timestamppb"
+
+	"github.com/floroz/auction-system/internal/pb"
+	"github.com/floroz/auction-system/internal/pkg/database"
 )
 
 // Validation errors
@@ -65,7 +66,9 @@ func (s *AuctionService) PlaceBid(ctx context.Context, cmd PlaceBidCommand) (*Bi
 	if err != nil {
 		return nil, fmt.Errorf("failed to begin transaction: %w", err)
 	}
-	defer tx.Rollback(ctx) // Rollback if commit is not called
+	defer func() {
+		_ = tx.Rollback(ctx) // Rollback if commit is not called
+	}()
 
 	// Lock the item row to prevent race conditions
 	// This ensures that only one transaction can modify this item at a time
@@ -74,12 +77,12 @@ func (s *AuctionService) PlaceBid(ctx context.Context, cmd PlaceBidCommand) (*Bi
 		return nil, fmt.Errorf("item not found: %w", err)
 	}
 
-	if err := validateBidAmount(cmd.Amount, item.CurrentHighestBid); err != nil {
-		return nil, err
+	if valErr := validateBidAmount(cmd.Amount, item.CurrentHighestBid); valErr != nil {
+		return nil, valErr
 	}
 
-	if err := validateAuctionNotEnded(item.EndAt); err != nil {
-		return nil, err
+	if valErr := validateAuctionNotEnded(item.EndAt); valErr != nil {
+		return nil, valErr
 	}
 
 	// Create the bid
@@ -92,13 +95,13 @@ func (s *AuctionService) PlaceBid(ctx context.Context, cmd PlaceBidCommand) (*Bi
 	}
 
 	// Step 1: Save the bid
-	if err := s.bidRepo.SaveBid(ctx, tx, bid); err != nil {
-		return nil, fmt.Errorf("failed to save bid: %w", err)
+	if saveErr := s.bidRepo.SaveBid(ctx, tx, bid); saveErr != nil {
+		return nil, fmt.Errorf("failed to save bid: %w", saveErr)
 	}
 
 	// Step 2: Update the item's highest bid
-	if err := s.itemRepo.UpdateHighestBid(ctx, tx, cmd.ItemID, cmd.Amount); err != nil {
-		return nil, fmt.Errorf("failed to update highest bid: %w", err)
+	if updateErr := s.itemRepo.UpdateHighestBid(ctx, tx, cmd.ItemID, cmd.Amount); updateErr != nil {
+		return nil, fmt.Errorf("failed to update highest bid: %w", updateErr)
 	}
 
 	// Step 3: Create the event (protobuf message)
@@ -111,9 +114,9 @@ func (s *AuctionService) PlaceBid(ctx context.Context, cmd PlaceBidCommand) (*Bi
 	}
 
 	// Marshal the protobuf message
-	payload, err := proto.Marshal(event)
-	if err != nil {
-		return nil, fmt.Errorf("failed to marshal event: %w", err)
+	payload, marshalErr := proto.Marshal(event)
+	if marshalErr != nil {
+		return nil, fmt.Errorf("failed to marshal event: %w", marshalErr)
 	}
 
 	// Step 4: Save the event to the outbox (in the same transaction)
@@ -125,14 +128,14 @@ func (s *AuctionService) PlaceBid(ctx context.Context, cmd PlaceBidCommand) (*Bi
 		CreatedAt: time.Now(),
 	}
 
-	if err := s.outboxRepo.SaveEvent(ctx, tx, outboxEvent); err != nil {
-		return nil, fmt.Errorf("failed to save outbox event: %w", err)
+	if saveErr := s.outboxRepo.SaveEvent(ctx, tx, outboxEvent); saveErr != nil {
+		return nil, fmt.Errorf("failed to save outbox event: %w", saveErr)
 	}
 
 	// Commit the transaction
 	// If this succeeds, both the bid and the event are guaranteed to be saved
-	if err := tx.Commit(ctx); err != nil {
-		return nil, fmt.Errorf("failed to commit transaction: %w", err)
+	if commitErr := tx.Commit(ctx); commitErr != nil {
+		return nil, fmt.Errorf("failed to commit transaction: %w", commitErr)
 	}
 
 	return bid, nil

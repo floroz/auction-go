@@ -66,7 +66,9 @@ func (r *OutboxRelay) processBatch(ctx context.Context) error {
 	if err != nil {
 		return fmt.Errorf("failed to begin transaction: %w", err)
 	}
-	defer tx.Rollback(ctx)
+	defer func() {
+		_ = tx.Rollback(ctx)
+	}()
 
 	// Fetch pending events with FOR UPDATE SKIP LOCKED
 	events, err := r.outboxRepo.GetPendingEvents(ctx, tx, r.batchSize)

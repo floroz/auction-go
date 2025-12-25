@@ -8,9 +8,10 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/jackc/pgx/v5/pgxpool"
+
 	"github.com/floroz/auction-system/internal/infra/database"
 	"github.com/floroz/auction-system/internal/infra/events"
-	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 func main() {
@@ -44,8 +45,8 @@ func main() {
 	}
 	defer pool.Close()
 
-	if err := pool.Ping(ctx); err != nil {
-		logger.Error("Unable to ping database", "error", err)
+	if pingErr := pool.Ping(ctx); pingErr != nil {
+		logger.Error("Unable to ping database", "error", pingErr)
 		os.Exit(1)
 	}
 	logger.Info("Postgres Connected")
@@ -74,8 +75,8 @@ func main() {
 	)
 
 	logger.Info("Starting Outbox Relay Worker...")
-	if err := relay.Run(ctx); err != nil {
-		logger.Error("Relay failed", "error", err)
+	if runErr := relay.Run(ctx); runErr != nil {
+		logger.Error("Relay failed", "error", runErr)
 		os.Exit(1)
 	}
 

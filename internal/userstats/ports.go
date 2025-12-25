@@ -8,7 +8,7 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-type UserStatsRepository interface {
+type Repository interface {
 	// IncrementUserStats increments the bid count and total amount for a user (Upsert)
 	IncrementUserStats(ctx context.Context, tx pgx.Tx, userID uuid.UUID, amount int64, lastBidAt time.Time) error
 

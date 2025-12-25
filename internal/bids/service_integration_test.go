@@ -6,18 +6,20 @@ import (
 	"testing"
 	"time"
 
-	"github.com/floroz/auction-system/internal/bids"
-	infradb "github.com/floroz/auction-system/internal/infra/database"
-	"github.com/floroz/auction-system/internal/pkg/database"
-	"github.com/floroz/auction-system/internal/testhelpers"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/floroz/auction-system/internal/bids"
+	infradb "github.com/floroz/auction-system/internal/infra/database"
+	"github.com/floroz/auction-system/internal/items"
+	"github.com/floroz/auction-system/internal/pkg/database"
+	"github.com/floroz/auction-system/internal/testhelpers"
 )
 
 // seedTestItem inserts a test item into the database
-func seedTestItem(t *testing.T, pool *pgxpool.Pool, item *bids.Item) {
+func seedTestItem(t *testing.T, pool *pgxpool.Pool, item *items.Item) {
 	t.Helper()
 	ctx := context.Background()
 	query := `
@@ -75,7 +77,7 @@ func TestAuctionService_PlaceBid_Success(t *testing.T) {
 	// Seed test data: Create an auction item
 	itemID := uuid.New()
 	userID := uuid.New()
-	testItem := &bids.Item{
+	testItem := &items.Item{
 		ID:                itemID,
 		Title:             "Vintage Guitar",
 		Description:       "A beautiful 1960s guitar",
@@ -119,7 +121,9 @@ func TestAuctionService_PlaceBid_Success(t *testing.T) {
 	// Verify: Outbox event was created
 	tx, err := svc.TxManager.BeginTx(ctx)
 	require.NoError(t, err)
-	defer tx.Rollback(ctx)
+	defer func() {
+		_ = tx.Rollback(ctx)
+	}()
 
 	events, err := svc.OutboxRepo.GetPendingEvents(ctx, tx, 10)
 	require.NoError(t, err, "Should be able to retrieve outbox events")
@@ -168,7 +172,7 @@ func TestAuctionService_PlaceBid_BidTooLow(t *testing.T) {
 
 	// Seed item with existing high bid
 	itemID := uuid.New()
-	testItem := &bids.Item{
+	testItem := &items.Item{
 		ID:                itemID,
 		Title:             "Expensive Watch",
 		Description:       "Luxury timepiece",
@@ -220,7 +224,7 @@ func TestAuctionService_PlaceBid_BidEqualToCurrent(t *testing.T) {
 
 	// Seed item
 	itemID := uuid.New()
-	testItem := &bids.Item{
+	testItem := &items.Item{
 		ID:                itemID,
 		Title:             "Rare Coin",
 		StartPrice:        50000,
@@ -259,7 +263,7 @@ func TestAuctionService_PlaceBid_AuctionEnded(t *testing.T) {
 
 	// Seed item that already ended
 	itemID := uuid.New()
-	testItem := &bids.Item{
+	testItem := &items.Item{
 		ID:                itemID,
 		Title:             "Expired Auction",
 		Description:       "This auction has ended",
@@ -309,7 +313,7 @@ func TestAuctionService_PlaceBid_RejectLowerBid(t *testing.T) {
 
 	// Seed item
 	itemID := uuid.New()
-	testItem := &bids.Item{
+	testItem := &items.Item{
 		ID:                itemID,
 		Title:             "Test Item",
 		StartPrice:        50000,
@@ -355,7 +359,9 @@ func TestAuctionService_PlaceBid_RejectLowerBid(t *testing.T) {
 	// Verify: Only one outbox event exists
 	tx, err := svc.TxManager.BeginTx(ctx)
 	require.NoError(t, err)
-	defer tx.Rollback(ctx)
+	defer func() {
+		_ = tx.Rollback(ctx)
+	}()
 
 	events, err := svc.OutboxRepo.GetPendingEvents(ctx, tx, 10)
 	require.NoError(t, err)
@@ -374,7 +380,7 @@ func TestAuctionService_PlaceBid_ConcurrentBids_Atomicity(t *testing.T) {
 
 	// Seed item
 	itemID := uuid.New()
-	testItem := &bids.Item{
+	testItem := &items.Item{
 		ID:                itemID,
 		Title:             "Test Item",
 		StartPrice:        50000,
@@ -454,7 +460,9 @@ func TestAuctionService_PlaceBid_ConcurrentBids_Atomicity(t *testing.T) {
 	// Verify: Number of outbox events matches successful bids
 	tx, err := svc.TxManager.BeginTx(ctx)
 	require.NoError(t, err)
-	defer tx.Rollback(ctx)
+	defer func() {
+		_ = tx.Rollback(ctx)
+	}()
 
 	events, err := svc.OutboxRepo.GetPendingEvents(ctx, tx, 100)
 	require.NoError(t, err)
@@ -473,7 +481,7 @@ func TestAuctionService_PlaceBid_RaceCondition_SameAmount(t *testing.T) {
 	svc := setupAuctionService(pool)
 
 	itemID := uuid.New()
-	testItem := &bids.Item{
+	testItem := &items.Item{
 		ID:                itemID,
 		Title:             "Test Item",
 		StartPrice:        50000,
@@ -533,7 +541,9 @@ func TestAuctionService_PlaceBid_RaceCondition_SameAmount(t *testing.T) {
 	// Verify: Number of outbox events matches successful bids
 	tx, err := svc.TxManager.BeginTx(ctx)
 	require.NoError(t, err)
-	defer tx.Rollback(ctx)
+	defer func() {
+		_ = tx.Rollback(ctx)
+	}()
 
 	events, err := svc.OutboxRepo.GetPendingEvents(ctx, tx, 10)
 	require.NoError(t, err)

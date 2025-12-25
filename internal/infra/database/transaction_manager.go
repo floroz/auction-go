@@ -36,7 +36,7 @@ func (m *PostgresTransactionManager) BeginTx(ctx context.Context) (pgx.Tx, error
 		timeoutMs := int(m.lockTimeout.Milliseconds())
 		_, err = tx.Exec(ctx, fmt.Sprintf("SET LOCAL lock_timeout = '%dms'", timeoutMs))
 		if err != nil {
-			tx.Rollback(ctx)
+			_ = tx.Rollback(ctx)
 			return nil, fmt.Errorf("failed to set lock timeout: %w", err)
 		}
 	}

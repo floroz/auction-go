@@ -4,10 +4,11 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/floroz/auction-system/internal/bids"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
+
+	"github.com/floroz/auction-system/internal/bids"
 )
 
 // PostgresBidRepository implements bids.BidRepository using pgx

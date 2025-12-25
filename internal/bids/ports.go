@@ -5,6 +5,8 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
+
+	"github.com/floroz/auction-system/internal/items"
 )
 
 // BidRepository defines the interface for bid persistence
@@ -35,12 +37,12 @@ type OutboxRepository interface {
 // ItemRepository defines the interface for item persistence
 type ItemRepository interface {
 	// GetItemByID retrieves an item by its ID
-	GetItemByID(ctx context.Context, itemID uuid.UUID) (*Item, error)
+	GetItemByID(ctx context.Context, itemID uuid.UUID) (*items.Item, error)
 
 	// GetItemByIDForUpdate retrieves an item by its ID and locks it for update
 	// This prevents race conditions when multiple users bid on the same item
 	// Must be called within a transaction
-	GetItemByIDForUpdate(ctx context.Context, tx pgx.Tx, itemID uuid.UUID) (*Item, error)
+	GetItemByIDForUpdate(ctx context.Context, tx pgx.Tx, itemID uuid.UUID) (*items.Item, error)
 
 	// UpdateHighestBid updates the current highest bid for an item within a transaction
 	UpdateHighestBid(ctx context.Context, tx pgx.Tx, itemID uuid.UUID, amount int64) error

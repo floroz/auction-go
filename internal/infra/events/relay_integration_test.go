@@ -7,15 +7,16 @@ import (
 	"testing"
 	"time"
 
-	"github.com/floroz/auction-system/internal/bids"
-	"github.com/floroz/auction-system/internal/infra/database"
-	"github.com/floroz/auction-system/internal/infra/events"
-	"github.com/floroz/auction-system/internal/testhelpers"
 	"github.com/google/uuid"
 	"github.com/rabbitmq/amqp091-go"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/testcontainers/testcontainers-go/modules/rabbitmq"
+
+	"github.com/floroz/auction-system/internal/bids"
+	"github.com/floroz/auction-system/internal/infra/database"
+	"github.com/floroz/auction-system/internal/infra/events"
+	"github.com/floroz/auction-system/internal/testhelpers"
 )
 
 // TestRelayIntegrationWithRabbitMQ runs a full integration test with a real RabbitMQ container
@@ -33,8 +34,8 @@ func TestRelayIntegrationWithRabbitMQ(t *testing.T) {
 	)
 	require.NoError(t, err)
 	defer func() {
-		if err := rabbitmqContainer.Terminate(ctx); err != nil {
-			t.Fatalf("failed to terminate container: %s", err)
+		if termErr := rabbitmqContainer.Terminate(ctx); termErr != nil {
+			t.Fatalf("failed to terminate container: %s", termErr)
 		}
 	}()
 
@@ -105,7 +106,9 @@ func TestRelayIntegrationWithRabbitMQ(t *testing.T) {
 
 	// 6. Run Relay
 	ctxRelay, cancelRelay := context.WithCancel(ctx)
-	go relay.Run(ctxRelay)
+	go func() {
+		_ = relay.Run(ctxRelay)
+	}()
 	defer cancelRelay()
 
 	// 7. Verify Message Receipt in RabbitMQ

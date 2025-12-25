@@ -7,25 +7,27 @@ import (
 	"github.com/floroz/auction-system/internal/pkg/database"
 )
 
-type UserStatsService struct {
-	repo      UserStatsRepository
+type Service struct {
+	repo      Repository
 	txManager database.TransactionManager
 }
 
-func NewUserStatsService(repo UserStatsRepository, txManager database.TransactionManager) *UserStatsService {
-	return &UserStatsService{
+func NewService(repo Repository, txManager database.TransactionManager) *Service {
+	return &Service{
 		repo:      repo,
 		txManager: txManager,
 	}
 }
 
-func (s *UserStatsService) ProcessBidPlaced(ctx context.Context, event BidPlacedEvent) error {
+func (s *Service) ProcessBidPlaced(ctx context.Context, event BidPlacedEvent) error {
 	// 1. Start Transaction
 	tx, err := s.txManager.BeginTx(ctx)
 	if err != nil {
 		return fmt.Errorf("failed to begin transaction: %w", err)
 	}
-	defer tx.Rollback(ctx)
+	defer func() {
+		_ = tx.Rollback(ctx)
+	}()
 
 	// 2. Check Idempotency (Has this event been processed?)
 	isProcessed, err := s.repo.IsEventProcessed(ctx, tx, event.EventID)
