@@ -9,6 +9,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 
 	"github.com/floroz/auction-system/internal/items"
+	pkgdb "github.com/floroz/auction-system/pkg/database"
 )
 
 // PostgresItemRepository implements bids.ItemRepository using pgx
@@ -33,7 +34,7 @@ func (r *PostgresItemRepository) GetItemByIDForUpdate(ctx context.Context, tx pg
 }
 
 // getItemByID is the internal implementation that works with any DBTX
-func (r *PostgresItemRepository) getItemByID(ctx context.Context, db DBTX, itemID uuid.UUID, forUpdate bool) (*items.Item, error) {
+func (r *PostgresItemRepository) getItemByID(ctx context.Context, db pkgdb.DBTX, itemID uuid.UUID, forUpdate bool) (*items.Item, error) {
 	query := `
 		SELECT id, title, description, start_price, current_highest_bid, end_at, created_at, updated_at
 		FROM items

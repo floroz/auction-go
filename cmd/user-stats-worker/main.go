@@ -15,6 +15,7 @@ import (
 	"github.com/floroz/auction-system/internal/infra/database"
 	"github.com/floroz/auction-system/internal/infra/events"
 	"github.com/floroz/auction-system/internal/userstats"
+	pkgdb "github.com/floroz/auction-system/pkg/database"
 )
 
 func main() {
@@ -63,7 +64,7 @@ func main() {
 	logger.Info("Postgres Connected")
 
 	// 2. Initialize Dependencies
-	txManager := database.NewPostgresTransactionManager(pool, 5*time.Second)
+	txManager := pkgdb.NewPostgresTransactionManager(pool, 5*time.Second)
 	statsRepo := database.NewUserStatsRepository(pool)
 	statsService := userstats.NewService(statsRepo, txManager)
 

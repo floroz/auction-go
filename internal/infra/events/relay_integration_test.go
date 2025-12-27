@@ -17,6 +17,8 @@ import (
 	"github.com/floroz/auction-system/internal/infra/database"
 	"github.com/floroz/auction-system/internal/infra/events"
 	"github.com/floroz/auction-system/internal/testhelpers"
+	pkgdb "github.com/floroz/auction-system/pkg/database"
+	pkgevents "github.com/floroz/auction-system/pkg/events"
 )
 
 // TestRelayIntegrationWithRabbitMQ runs a full integration test with a real RabbitMQ container
@@ -53,11 +55,11 @@ func TestRelayIntegrationWithRabbitMQ(t *testing.T) {
 	require.NoError(t, err)
 	defer pubConn.Close()
 
-	rabbitPublisher, err := events.NewRabbitMQPublisher(pubConn)
+	rabbitPublisher, err := pkgevents.NewRabbitMQPublisher(pubConn)
 	require.NoError(t, err)
 	defer rabbitPublisher.Close()
 
-	txManager := database.NewPostgresTransactionManager(dbPool, time.Second)
+	txManager := pkgdb.NewPostgresTransactionManager(dbPool, time.Second)
 	outboxRepo := database.NewPostgresOutboxRepository(dbPool)
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 

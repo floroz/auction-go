@@ -20,6 +20,7 @@ import (
 	"github.com/floroz/auction-system/internal/pb"
 	"github.com/floroz/auction-system/internal/testhelpers"
 	"github.com/floroz/auction-system/internal/userstats"
+	pkgdb "github.com/floroz/auction-system/pkg/database"
 )
 
 func TestBidConsumerIntegration(t *testing.T) {
@@ -51,7 +52,7 @@ func TestBidConsumerIntegration(t *testing.T) {
 	dbPool := testDB.Pool
 
 	// 3. Setup Dependencies
-	txManager := database.NewPostgresTransactionManager(dbPool, time.Second)
+	txManager := pkgdb.NewPostgresTransactionManager(dbPool, time.Second)
 	statsRepo := database.NewUserStatsRepository(dbPool)
 	statsService := userstats.NewService(statsRepo, txManager)
 

@@ -10,7 +10,7 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 
 	"github.com/floroz/auction-system/internal/pb"
-	"github.com/floroz/auction-system/internal/pkg/database"
+	"github.com/floroz/auction-system/pkg/database"
 )
 
 // Validation errors

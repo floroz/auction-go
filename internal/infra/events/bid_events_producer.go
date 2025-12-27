@@ -10,22 +10,24 @@ import (
 	amqp "github.com/rabbitmq/amqp091-go"
 
 	"github.com/floroz/auction-system/internal/infra/database"
+	pkgdb "github.com/floroz/auction-system/pkg/database"
+	pkgevents "github.com/floroz/auction-system/pkg/events"
 )
 
 // BidEventsProducer orchestrates the process of relaying bid events from the outbox to RabbitMQ
 type BidEventsProducer struct {
 	relay     *OutboxRelay
-	publisher *RabbitMQPublisher
+	publisher *pkgevents.RabbitMQPublisher
 }
 
 // NewBidEventsProducer creates a new producer
 func NewBidEventsProducer(pool *pgxpool.Pool, conn *amqp.Connection, logger *slog.Logger) (*BidEventsProducer, error) {
-	publisher, err := NewRabbitMQPublisher(conn)
+	publisher, err := pkgevents.NewRabbitMQPublisher(conn)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create publisher: %w", err)
 	}
 
-	txManager := database.NewPostgresTransactionManager(pool, 3*time.Second)
+	txManager := pkgdb.NewPostgresTransactionManager(pool, 3*time.Second)
 	outboxRepo := database.NewPostgresOutboxRepository(pool)
 
 	relay := NewOutboxRelay(

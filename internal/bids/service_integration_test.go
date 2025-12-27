@@ -14,8 +14,8 @@ import (
 	"github.com/floroz/auction-system/internal/bids"
 	infradb "github.com/floroz/auction-system/internal/infra/database"
 	"github.com/floroz/auction-system/internal/items"
-	"github.com/floroz/auction-system/internal/pkg/database"
 	"github.com/floroz/auction-system/internal/testhelpers"
+	"github.com/floroz/auction-system/pkg/database"
 )
 
 // seedTestItem inserts a test item into the database
@@ -50,7 +50,7 @@ type testServices struct {
 
 // setupAuctionService creates a service with all its dependencies for testing
 func setupAuctionService(pool *pgxpool.Pool) *testServices {
-	txManager := infradb.NewPostgresTransactionManager(pool, 5*time.Second)
+	txManager := database.NewPostgresTransactionManager(pool, 5*time.Second)
 	bidRepo := infradb.NewPostgresBidRepository(pool)
 	itemRepo := infradb.NewPostgresItemRepository(pool)
 	outboxRepo := infradb.NewPostgresOutboxRepository(pool)

@@ -15,6 +15,7 @@ import (
 
 	"github.com/floroz/auction-system/internal/bids"
 	"github.com/floroz/auction-system/internal/infra/database"
+	pkgdb "github.com/floroz/auction-system/pkg/database"
 )
 
 func main() {
@@ -85,7 +86,7 @@ func main() {
 
 	// 4. Initialize Repositories (Infrastructure Layer)
 	// Set lock timeout to 3 seconds to prevent indefinite waiting
-	txManager := database.NewPostgresTransactionManager(pool, 3*time.Second)
+	txManager := pkgdb.NewPostgresTransactionManager(pool, 3*time.Second)
 	bidRepo := database.NewPostgresBidRepository(pool)
 	itemRepo := database.NewPostgresItemRepository(pool)
 	outboxRepo := database.NewPostgresOutboxRepository(pool)

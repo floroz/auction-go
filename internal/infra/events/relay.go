@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/floroz/auction-system/internal/bids"
-	"github.com/floroz/auction-system/internal/pkg/database"
+	"github.com/floroz/auction-system/pkg/database"
 )
 
 // OutboxRelay polls the database for pending events and publishes them
