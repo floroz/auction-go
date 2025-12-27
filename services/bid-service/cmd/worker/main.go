@@ -36,9 +36,9 @@ func main() {
 	}()
 
 	// 1. Initialize Postgres Connection Pool
-	dbURL := os.Getenv("DATABASE_URL")
+	dbURL := os.Getenv("BID_DB_URL")
 	if dbURL == "" {
-		logger.Error("DATABASE_URL is not set")
+		logger.Error("BID_DB_URL is not set")
 		os.Exit(1)
 	}
 	dbConfig, err := pgxpool.ParseConfig(dbURL)

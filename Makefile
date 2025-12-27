@@ -7,47 +7,61 @@ help: ## Show this help message
 
 .PHONY: up
 up: ## Start infrastructure services
-	docker-compose up -d
+	docker compose up -d
 
 .PHONY: down
 down: ## Stop infrastructure services
-	docker-compose down
+	docker compose down
 
-.PHONY: migrate-up
-migrate-up: ## Run database migrations
-	goose -dir migrations postgres "host=localhost port=5432 user=user password=password dbname=auction_db sslmode=disable" up
+.PHONY: migrate-bids-up
+migrate-bids-up: ## Run Bid Service migrations
+	goose -dir services/bid-service/migrations postgres "host=localhost port=5432 user=user password=password dbname=bid_db sslmode=disable" up
 
-.PHONY: migrate-down
-migrate-down: ## Rollback last database migration
-	goose -dir migrations postgres "host=localhost port=5432 user=user password=password dbname=auction_db sslmode=disable" down
+.PHONY: migrate-bids-down
+migrate-bids-down: ## Rollback Bid Service migration
+	goose -dir services/bid-service/migrations postgres "host=localhost port=5432 user=user password=password dbname=bid_db sslmode=disable" down
 
-.PHONY: migrate-status
-migrate-status: ## Check migration status
-	goose -dir migrations postgres "host=localhost port=5432 user=user password=password dbname=auction_db sslmode=disable" status
+.PHONY: migrate-bids-create
+migrate-bids-create: ## Create a new Bid Service migration (usage: make migrate-bids-create NAME=add_bids_table)
+	goose -dir services/bid-service/migrations create $(NAME) sql
 
-.PHONY: migrate-create
-migrate-create: ## Create a new migration file (usage: make migrate-create NAME=add_users_table)
-	goose -dir migrations create $(NAME) sql
+.PHONY: migrate-stats-up
+migrate-stats-up: ## Run User Stats Service migrations
+	goose -dir services/user-stats-service/migrations postgres "host=localhost port=5433 user=user password=password dbname=stats_db sslmode=disable" up
+
+.PHONY: migrate-stats-down
+migrate-stats-down: ## Rollback User Stats Service migration
+	goose -dir services/user-stats-service/migrations postgres "host=localhost port=5433 user=user password=password dbname=stats_db sslmode=disable" down
+
+.PHONY: migrate-stats-create
+migrate-stats-create: ## Create a new User Stats Service migration
+	goose -dir services/user-stats-service/migrations create $(NAME) sql
+
+.PHONY: migrate-up-all
+migrate-up-all: migrate-bids-up migrate-stats-up ## Run all migrations
+
+.PHONY: migrate-down-all
+migrate-down-all: migrate-bids-down migrate-stats-down ## Rollback all migrations
 
 .PHONY: run-bid-service
 run-bid-service: ## Run the Bid Service (Producer)
-	go run cmd/bid-service/main.go
+	go run services/bid-service/cmd/api/main.go
 
 .PHONY: run-bid-worker
 run-bid-worker: ## Run the Bid Worker (Outbox Relay)
-	go run cmd/bid-worker/main.go
+	go run services/bid-service/cmd/worker/main.go
 
 .PHONY: run-stats-service
 run-stats-service: ## Run the User Stats Service (Consumer)
-	go run cmd/user-stats-service/main.go
+	go run services/user-stats-service/cmd/worker/main.go
 
 .PHONY: run-all
 run-all: ## Run all services concurrently
 	@echo "Starting all services... Press Ctrl+C to stop."
 	@trap 'kill 0' INT; \
-	go run cmd/bid-service/main.go 2>&1 | sed "s/^/[BID-API] /" & \
-	go run cmd/bid-worker/main.go 2>&1 | sed "s/^/[WORKER]  /" & \
-	go run cmd/user-stats-service/main.go 2>&1 | sed "s/^/[STATS]   /" & \
+	go run services/bid-service/cmd/api/main.go 2>&1 | sed "s/^/[BID-API] /" & \
+	go run services/bid-service/cmd/worker/main.go 2>&1 | sed "s/^/[WORKER]  /" & \
+	go run services/user-stats-service/cmd/worker/main.go 2>&1 | sed "s/^/[STATS]   /" & \
 	wait
 
 .PHONY: test
