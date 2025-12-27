@@ -97,6 +97,10 @@ func main() {
 
 	mux := http.NewServeMux()
 	mux.Handle(path, handler)
+	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write([]byte("OK"))
+	})
 
 	// 7. Start Server
 	addr := ":8080"

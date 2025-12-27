@@ -65,6 +65,10 @@ func main() {
 
 	mux := http.NewServeMux()
 	mux.Handle(path, handler)
+	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write([]byte("OK"))
+	})
 
 	// 4. Start Server
 	addr := ":8081" // Use 8081 for Stats Service API to avoid conflict with Bid API (8080)
