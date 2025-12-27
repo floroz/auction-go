@@ -112,14 +112,14 @@ proto-gen: install-protoc ## Generate Go code from protobuf files
 		echo "Make sure $$HOME/go/bin (or $$GOPATH/bin) is in your PATH."; \
 		exit 1; \
 	fi
-	@mkdir -p internal/pb
+	@mkdir -p pkg/proto
 	tools/protoc \
 		--go_out=. \
 		--go_opt=module=github.com/floroz/auction-system \
 		--proto_path=api/proto \
 		--proto_path=tools/include \
 		api/proto/events.proto
-	@echo "Protobuf code generated in internal/pb/"
+	@echo "Protobuf code generated in pkg/proto/"
 
 .PHONY: lint
 lint: ## Run linter
