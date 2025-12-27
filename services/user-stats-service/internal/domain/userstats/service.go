@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/google/uuid"
+
 	"github.com/floroz/gavel/pkg/database"
 )
 
@@ -56,4 +58,8 @@ func (s *Service) ProcessBidPlaced(ctx context.Context, event BidPlacedEvent) er
 	}
 
 	return nil
+}
+
+func (s *Service) GetUserStats(ctx context.Context, userID uuid.UUID) (*UserStats, error) {
+	return s.repo.GetUserStats(ctx, userID)
 }

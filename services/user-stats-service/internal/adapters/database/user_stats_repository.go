@@ -59,7 +59,7 @@ func (r *UserStatsRepository) GetUserStats(ctx context.Context, userID uuid.UUID
 	)
 	if err != nil {
 		if err == pgx.ErrNoRows {
-			return nil, fmt.Errorf("user stats not found")
+			return nil, nil
 		}
 		return nil, fmt.Errorf("failed to get user stats: %w", err)
 	}
