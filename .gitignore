@@ -20,3 +20,6 @@ go.work.sum
 tools/
 internal/pb/
 
+# Environment files
+.env
+.env.local
