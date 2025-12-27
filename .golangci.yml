@@ -3,6 +3,11 @@ run:
   timeout: 5m
   modules-download-mode: readonly
 
+issues:
+  exclude-files:
+    # Generated protobuf code
+    - ".*\\.pb\\.go$"
+    
 linters:
   disable-all: true
   enable:
