@@ -16,6 +16,11 @@ I am a Frontend Engineer with intermediate Go knowledge. I am building a "Real-T
   - `bid-service` builds a single Docker image containing both the API binary (`/bin/bid-service`) and the Worker binary (`/bin/bid-worker`).
   - **Local Dev:** Docker Compose runs them as separate services sharing the same build context.
   - **Production (K8s):** We will use the "Single Image, Multiple Deployments" pattern. One Deployment for the API (scaled on CPU/Traffic) and one Deployment for the Worker (scaled on Queue Depth), both using the same image but different `entrypoint` commands.
+- **Frontend-Backend Communication:**
+  - **Protocol:** ConnectRPC (Protobuf) over HTTP/2.
+  - **Local Development:** Services expose `h2c` (HTTP/2 Cleartext) directly to `localhost`.
+  - **Production:** A Reverse Proxy / Ingress Gateway (e.g., Nginx, Traefik) handles TLS termination and forwards traffic to services via `h2c` (internal cleartext).
+  - **Implementation Requirement:** We must eventually add an Ingress/Gateway component (e.g., in `docker-compose`) to simulate the production environment where the Frontend talks to a single endpoint (`/api`) rather than direct service ports.
 
 ## Core Learning Objectives
 1. **The Transactional Outbox Pattern:** Solving the "dual-write" problem to ensure DB and RabbitMQ consistency.
