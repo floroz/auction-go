@@ -11,11 +11,17 @@ I am a Frontend Engineer with intermediate Go knowledge. I am building a "Real-T
 - **Observability:** Structured logging (slog) with Correlation IDs and Prometheus metrics.
 - **Deployment:** Docker Compose (local) and a VPS-ready configuration.
 
+## Architecture Decisions
+- **Service & Worker Scaling:**
+  - `bid-service` builds a single Docker image containing both the API binary (`/bin/bid-service`) and the Worker binary (`/bin/bid-worker`).
+  - **Local Dev:** Docker Compose runs them as separate services sharing the same build context.
+  - **Production (K8s):** We will use the "Single Image, Multiple Deployments" pattern. One Deployment for the API (scaled on CPU/Traffic) and one Deployment for the Worker (scaled on Queue Depth), both using the same image but different `entrypoint` commands.
+
 ## Core Learning Objectives
 1. **The Transactional Outbox Pattern:** Solving the "dual-write" problem to ensure DB and RabbitMQ consistency.
 2. **Advanced DB Migration Management:** You must teach me how to handle breaking schema changes. This includes "Data Migrations" where we update millions of rows or change a column type without downtime.
-3. **Concurrency & Integrity:** Using Postgres 'SELECT FOR UPDATE' or Redis locks to handle race conditions in bids.
-4. **Idempotency:** Ensuring consumers can handle duplicate messages safely.
+3. **Concurrency & Integrity:** Using Postgres 'SELECT FOR UPDATE' to handle race conditions in bids.
+4. **Idempotency & Data Consistency:** Building a "User Stats" consumer that processes events safely, handling duplicate messages without corrupting data (e.g., ensuring "Total Spent" isn't double-counted).
 5. **Testing:** Implementing Integration Tests using 'Testcontainers'.
 
 ## Your Rules as TA:
@@ -27,7 +33,7 @@ I am a Frontend Engineer with intermediate Go knowledge. I am building a "Real-T
 ## Initial State: Milestone 1 (The Foundation)
 Please provide:
 1. A recommended project folder structure (Go-standard).
-2. A `docker-compose.yml` including Postgres, RabbitMQ, and Redis.
+2. A `docker compose.yml` including Postgres, RabbitMQ, and Redis.
 3. The first 'goose' migration files for `items` and `bids` tables.
 4. A simple 'Hello World' Go server setup that connects to these services and verifies connectivity.
 
