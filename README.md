@@ -1,7 +1,5 @@
 # 🔨 Gavel: High-Performance Real-Time Auction System
 
-![Auction Header](https://images.unsplash.com/photo-1584281723320-cd3c896317d3?auto=format&fit=crop&q=80&w=2000&h=600)
-
 [![Go Version](https://img.shields.io/badge/Go-1.24+-00ADD8?style=flat-square&logo=go)](https://go.dev/)
 [![Postgres](https://img.shields.io/badge/Postgres-16-336791?style=flat-square&logo=postgresql)](https://www.postgresql.org/)
 [![RabbitMQ](https://img.shields.io/badge/RabbitMQ-Latest-FF6600?style=flat-square&logo=rabbitmq)](https://www.rabbitmq.com/)
