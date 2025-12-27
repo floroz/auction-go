@@ -27,13 +27,16 @@ The system leverages a decoupled **Ports & Adapters (Hexagonal)** architecture, 
 
 ```mermaid
 graph TD
+    User((User)) -->|JSON/ConnectRPC| LB{Load Balancer}
+
     subgraph "Bid Domain (Write Side)"
-        API[Bid Service API]
+        LB -->|/bids.v1...| BidAPI[Bid Service API]
         Worker[Bid Outbox Worker]
         BidDB[(Postgres: bid_db)]
     end
 
     subgraph "Analytics Domain (Read Side)"
+        LB -->|/userstats.v1...| StatsAPI[User Stats API]
         StatsWorker[User Stats Consumer]
         StatsDB[(Postgres: stats_db)]
     end
@@ -44,14 +47,15 @@ graph TD
     end
 
     %% Flows
-    User((User)) -->|Place Bid| API
-    API -->|Tx: Save Bid + Outbox Event| BidDB
+    BidAPI -->|Tx: Save Bid + Outbox Event| BidDB
     
     Worker -->|Poll Outbox Table| BidDB
     Worker -->|Publish Event| RMQ
     
     RMQ -->|Consume: BidPlaced| StatsWorker
     StatsWorker -->|Update User Totals| StatsDB
+    
+    StatsAPI -->|Read| StatsDB
 ```
 
 ---
@@ -64,6 +68,31 @@ graph TD
 -   **Caching**: Redis (Bidding leaderboards and item metadata)
 -   **Protocol**: Protobuf for high-efficiency message serialization
 -   **Pattern**: Hexagonal Architecture (Clean Architecture)
+
+---
+
+## 🔌 API & Communication
+
+We use **ConnectRPC** for the service-to-frontend API. This provides a "best of both worlds" approach:
+
+1.  **Frontend**: Auto-generated, type-safe TypeScript clients (Protocol Buffers).
+2.  **Testing**: Standard JSON over HTTP (curl / Postman) without needing special tools.
+
+### Testing Endpoints (JSON)
+
+**Place Bid** (Write)
+```bash
+curl -X POST -H "Content-Type: application/json" \
+  -d '{"item_id": "uuid", "user_id": "uuid", "amount": 15000}' \
+  http://localhost:8080/bids.v1.BidService/PlaceBid
+```
+
+**Get User Stats** (Read)
+```bash
+curl -X POST -H "Content-Type: application/json" \
+  -d '{"user_id": "uuid"}' \
+  http://localhost:8081/userstats.v1.UserStatsService/GetUserStats
+```
 
 ---
 
@@ -96,7 +125,9 @@ make run-all
 | `make up / down` | Control local infrastructure |
 | `make test` | Run full test suite (Unit + Integration) |
 | `make build-all` | Compile production binaries / Docker images |
-| `make proto-gen` | Rebuild Protobuf definitions |
+| `make proto-gen` | Rebuild Protobuf definitions (Go) |
+| `make proto-gen-ts` | Generate TypeScript clients |
+| `make run-stats-api` | Run User Stats API (Read) |
 
 ---
 
