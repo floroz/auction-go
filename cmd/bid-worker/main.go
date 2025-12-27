@@ -6,11 +6,10 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
-	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
+	amqp "github.com/rabbitmq/amqp091-go"
 
-	"github.com/floroz/auction-system/internal/infra/database"
 	"github.com/floroz/auction-system/internal/infra/events"
 )
 
@@ -51,33 +50,30 @@ func main() {
 	}
 	logger.Info("Postgres Connected")
 
-	// 2. Initialize RabbitMQ Publisher
-	rabbitPublisher, err := events.NewRabbitMQPublisher("amqp://guest:guest@localhost:5672/")
+	// 2. Connect to RabbitMQ
+	amqpConn, err := amqp.Dial("amqp://guest:guest@localhost:5672/")
 	if err != nil {
-		logger.Error("Failed to initialize RabbitMQ publisher", "error", err)
+		logger.Error("Failed to connect to RabbitMQ", "error", err)
 		os.Exit(1)
 	}
-	defer rabbitPublisher.Close()
+	defer amqpConn.Close()
 	logger.Info("RabbitMQ Connected")
 
-	// 3. Initialize Repositories and Relay
-	// Set lock timeout to 3 seconds
-	txManager := database.NewPostgresTransactionManager(pool, 3*time.Second)
-	outboxRepo := database.NewPostgresOutboxRepository(pool)
-
-	relay := events.NewOutboxRelay(
-		outboxRepo,
-		rabbitPublisher,
-		txManager,
-		10,                   // Batch size
-		500*time.Millisecond, // Polling interval
-		logger,
-	)
-
-	logger.Info("Starting Outbox Relay Worker...")
-	if runErr := relay.Run(ctx); runErr != nil {
-		logger.Error("Relay failed", "error", runErr)
+	// 3. Initialize Producer
+	producer, err := events.NewBidEventsProducer(pool, amqpConn, logger)
+	if err != nil {
+		logger.Error("Failed to create producer", "error", err)
 		os.Exit(1)
+	}
+	defer producer.Close()
+
+	logger.Info("Starting Bid Events Producer...")
+	if runErr := producer.Run(ctx); runErr != nil {
+		logger.Error("Producer failed", "error", runErr)
+		// Run returns nil on context cancel.
+		if ctx.Err() == nil {
+			os.Exit(1)
+		}
 	}
 
 	logger.Info("Worker stopped")
