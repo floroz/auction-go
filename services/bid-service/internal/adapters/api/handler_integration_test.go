@@ -145,4 +145,3 @@ func TestBidServiceHandler_PlaceBid_Integration(t *testing.T) {
 		assert.Equal(t, connect.CodeInternal, connect.CodeOf(err))
 	})
 }
-
