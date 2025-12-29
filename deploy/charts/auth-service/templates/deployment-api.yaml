@@ -31,6 +31,8 @@ spec:
           env:
             - name: AUTH_DB_URL
               value: {{ .Values.config.authDbUrl | quote }}
+            - name: RABBITMQ_URL
+              value: {{ .Values.config.rabbitmqUrl | quote }}
             - name: AUTH_PRIVATE_KEY_PATH
               value: "/app/keys/private.pem"
             - name: AUTH_PUBLIC_KEY_PATH

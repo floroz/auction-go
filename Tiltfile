@@ -42,7 +42,8 @@ def deploy_helm(name, repo_name, repo_url, chart, namespace, values_files=[], ve
 local_resource(
   'generate_keys',
   cmd='scripts/generate-dev-keys.sh',
-  deps=['scripts/generate-dev-keys.sh']
+  deps=['scripts/generate-dev-keys.sh'],
+  labels=['jobs']
 )
 
 # Create secret if it doesn't exist.
@@ -136,12 +137,12 @@ auth_service_yaml = helm(
 k8s_yaml(auth_service_yaml)
 
 k8s_resource('auth-service-migrate', 
-  labels=['migrations'], 
+  labels=['jobs'], 
   resource_deps=['postgres-auth']
 )
 k8s_resource('auth-service-api', 
   labels=['app'], 
-  resource_deps=['postgres-auth', 'auth-service-migrate', 'create_auth_keys_secret']
+  resource_deps=['postgres-auth', 'rabbitmq', 'auth-service-migrate', 'create_auth_keys_secret']
 )
 
 # Bid Service
@@ -159,7 +160,7 @@ bid_service_yaml = helm(
 k8s_yaml(bid_service_yaml)
 
 k8s_resource('bid-service-migrate', 
-  labels=['migrations'], 
+  labels=['jobs'], 
   resource_deps=['postgres-bids']
 )
 k8s_resource('bid-service-api', 
@@ -187,7 +188,7 @@ user_stats_service_yaml = helm(
 k8s_yaml(user_stats_service_yaml)
 
 k8s_resource('user-stats-service-migrate', 
-  labels=['migrations'], 
+  labels=['jobs'], 
   resource_deps=['postgres-stats']
 )
 k8s_resource('user-stats-service-api', 

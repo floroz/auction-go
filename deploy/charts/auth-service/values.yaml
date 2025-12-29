@@ -10,6 +10,7 @@ ingress:
 
 config:
   authDbUrl: "postgres://user:password@postgres-auth-postgresql:5432/auth_db?sslmode=disable"
+  rabbitmqUrl: "amqp://user:password@rabbitmq:5672/"
 
 resources:
   requests:
