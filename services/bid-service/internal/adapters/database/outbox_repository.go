@@ -26,7 +26,7 @@ func NewPostgresOutboxRepository(pool *pgxpool.Pool) *PostgresOutboxRepository {
 func (r *PostgresOutboxRepository) SaveEvent(ctx context.Context, tx pgx.Tx, event *bids.OutboxEvent) error {
 	query := `
 		INSERT INTO outbox_events (id, event_type, payload, status, created_at)
-		VALUES ($1, $2, $3, $4, $5)
+		VALUES ($1, $2, $3, $4::outbox_status, $5)
 	`
 	_, err := tx.Exec(ctx, query,
 		event.ID,
@@ -47,7 +47,7 @@ func (r *PostgresOutboxRepository) GetPendingEvents(ctx context.Context, tx pgx.
 	query := `
 		SELECT id, event_type, payload, status, created_at, processed_at
 		FROM outbox_events
-		WHERE status = $1
+		WHERE status = $1::outbox_status
 		ORDER BY created_at ASC
 		LIMIT $2
 		FOR UPDATE SKIP LOCKED
@@ -90,7 +90,7 @@ func (r *PostgresOutboxRepository) GetPendingEvents(ctx context.Context, tx pgx.
 func (r *PostgresOutboxRepository) UpdateEventStatus(ctx context.Context, tx pgx.Tx, eventID uuid.UUID, status bids.OutboxStatus) error {
 	query := `
 		UPDATE outbox_events
-		SET status = $1, processed_at = $2
+		SET status = $1::outbox_status, processed_at = $2
 		WHERE id = $3
 	`
 
