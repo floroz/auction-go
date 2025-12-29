@@ -33,9 +33,14 @@ graph TD
     User((User)) -->|JSON/ConnectRPC| Ingress{NGINX Ingress}
     
     subgraph "Kubernetes Cluster"
-        Ingress -->|api.auction.local/bids.v1...| BidAPI[Bid Service API]
-        Ingress -->|api.auction.local/userstats.v1...| StatsAPI[User Stats API]
+        Ingress -->|api.auction.local/auth.v1...| AuthAPI[Auth Service]
+        Ingress -- "Bearer JWT (Claims)" --> BidAPI["Bid Service API<br/>(w/ Auth Middleware)"]
+        Ingress -- "Bearer JWT (Claims)" --> StatsAPI["User Stats API<br/>(w/ Auth Middleware)"]
         
+        subgraph "Identity Domain"
+            AuthAPI -->|AuthN & Issue Tokens| AuthDB[(Postgres: auth_db)]
+        end
+
         subgraph "Bid Domain (Write Side)"
             BidAPI -->|Tx: Save Bid + Outbox Event| BidDB[(Postgres: bid_db)]
             Worker[Bid Outbox Worker]
