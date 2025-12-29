@@ -106,7 +106,8 @@ proto-gen: install-protoc ## Generate Go code from protobuf files
 		--proto_path=tools/include \
 		api/proto/events.proto \
 		api/proto/bids/v1/bid_service.proto \
-		api/proto/userstats/v1/user_stats_service.proto
+		api/proto/userstats/v1/user_stats_service.proto \
+		api/proto/auth/v1/auth_service.proto
 	@echo "Protobuf code generated in pkg/proto/"
 
 .PHONY: proto-gen-ts
