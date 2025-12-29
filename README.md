@@ -155,9 +155,9 @@ Run the verification script to check service health:
 
 Gavel prioritizes **real-world reliability** over theoretical unit coverage. Our testing philosophy is built on three pillars:
 
-*   **Integration-First**: We prefer testing components against real infrastructure (Postgres, RabbitMQ) rather than using mocks. This ensures that our SQL queries, transaction boundaries, and message delivery logic are actually correct.
-*   **Testcontainers**: We use [Testcontainers-go](https://golang.testcontainers.org/) to spin up ephemeral, production-identical instances of our dependencies for every test suite.
-*   **No Mocks Policy**: We discourage the use of mock frameworks (like `gomock` or `testify/mock`) for infrastructure layers. If you need to test a repository, test it against a real database.
+*   **Vertical Slice Integration**: We test the entire request lifecycle (Handler -> Service -> Repository -> DB) using real infrastructure. This validates the contracts between layers and ensures that SQL queries, transaction boundaries, and error handling work together correctly.
+*   **Testcontainers**: We use [Testcontainers-go](https://golang.testcontainers.org/) to spin up ephemeral, production-identical instances of dependencies (Postgres, RabbitMQ) for every test suite.
+*   **No Mocks Policy**: We avoid mocking infrastructure layers. If we need to test business logic that doesn't depend on IO, we extract it into pure functions and unit test them separately.
 
 ### Running Tests
 

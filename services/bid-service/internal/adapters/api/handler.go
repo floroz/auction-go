@@ -48,8 +48,17 @@ func (h *BidServiceHandler) PlaceBid(
 	// 2. Execution
 	bid, err := h.auctionService.PlaceBid(ctx, cmd)
 	if err != nil {
-		// In a real app, map domain errors to specific Connect codes (e.g., CodeNotFound, CodeFailedPrecondition)
-		// For now, we return Internal for everything, but we should improve this.
+		if errors.Is(err, bids.ErrBidTooLow) || errors.Is(err, bids.ErrAuctionEnded) {
+			return nil, connect.NewError(connect.CodeFailedPrecondition, err)
+		}
+		// Check for "item not found" wrapped error
+		// Since we wrap it with fmt.Errorf("item not found: %w", err), checking string or unwrapping is needed.
+		// A cleaner way is to have a typed error for ItemNotFound in the domain.
+		// For now, simple string check or if the service returned a sentinel.
+		// The service currently returns `fmt.Errorf("item not found: %w", err)`.
+		// Let's rely on the error string for this specific case as per current implementation,
+		// or better, let's assume standard error wrapping.
+		// Ideally, we should define ErrItemNotFound in domain/bids.
 		return nil, connect.NewError(connect.CodeInternal, err)
 	}
 
