@@ -12,6 +12,9 @@ type Repository interface {
 	// IncrementUserStats increments the bid count and total amount for a user (Upsert)
 	IncrementUserStats(ctx context.Context, tx pgx.Tx, userID uuid.UUID, amount int64, lastBidAt time.Time) error
 
+	// CreateUserStats initializes stats for a new user (Idempotent)
+	CreateUserStats(ctx context.Context, tx pgx.Tx, userID uuid.UUID, createdAt time.Time) error
+
 	// GetUserStats retrieves stats for a user
 	GetUserStats(ctx context.Context, userID uuid.UUID) (*UserStats, error)
 

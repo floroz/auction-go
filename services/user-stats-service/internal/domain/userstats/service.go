@@ -60,6 +60,43 @@ func (s *Service) ProcessBidPlaced(ctx context.Context, event BidPlacedEvent) er
 	return nil
 }
 
+func (s *Service) ProcessUserCreated(ctx context.Context, event UserCreatedEvent) error {
+	// 1. Start Transaction
+	tx, err := s.txManager.BeginTx(ctx)
+	if err != nil {
+		return fmt.Errorf("failed to begin transaction: %w", err)
+	}
+	defer func() {
+		_ = tx.Rollback(ctx)
+	}()
+
+	// 2. Check Idempotency
+	isProcessed, err := s.repo.IsEventProcessed(ctx, tx, event.EventID)
+	if err != nil {
+		return fmt.Errorf("failed to check idempotency: %w", err)
+	}
+	if isProcessed {
+		return nil
+	}
+
+	// 3. Create User Stats
+	if err := s.repo.CreateUserStats(ctx, tx, event.UserID, event.CreatedAt); err != nil {
+		return fmt.Errorf("failed to create user stats: %w", err)
+	}
+
+	// 4. Mark Event as Processed
+	if err := s.repo.MarkEventProcessed(ctx, tx, event.EventID); err != nil {
+		return fmt.Errorf("failed to mark event as processed: %w", err)
+	}
+
+	// 5. Commit
+	if err := tx.Commit(ctx); err != nil {
+		return fmt.Errorf("failed to commit transaction: %w", err)
+	}
+
+	return nil
+}
+
 func (s *Service) GetUserStats(ctx context.Context, userID uuid.UUID) (*UserStats, error) {
 	return s.repo.GetUserStats(ctx, userID)
 }

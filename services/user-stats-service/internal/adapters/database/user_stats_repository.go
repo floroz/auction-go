@@ -42,6 +42,19 @@ func (r *UserStatsRepository) IncrementUserStats(ctx context.Context, tx pgx.Tx,
 	return nil
 }
 
+func (r *UserStatsRepository) CreateUserStats(ctx context.Context, tx pgx.Tx, userID uuid.UUID, createdAt time.Time) error {
+	query := `
+		INSERT INTO user_stats (user_id, total_bids_placed, total_amount_bid, last_bid_at, created_at, updated_at)
+		VALUES ($1, 0, 0, NULL, $2, $2)
+		ON CONFLICT (user_id) DO NOTHING
+	`
+	_, err := tx.Exec(ctx, query, userID, createdAt)
+	if err != nil {
+		return fmt.Errorf("failed to create user stats: %w", err)
+	}
+	return nil
+}
+
 func (r *UserStatsRepository) GetUserStats(ctx context.Context, userID uuid.UUID) (*userstats.UserStats, error) {
 	query := `
 		SELECT user_id, total_bids_placed, total_amount_bid, last_bid_at, created_at, updated_at

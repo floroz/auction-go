@@ -28,3 +28,13 @@ type BidPlacedEvent struct {
 	Amount    int64
 	Timestamp time.Time
 }
+
+// UserCreatedEvent represents the domain event for a new user
+type UserCreatedEvent struct {
+	EventID     uuid.UUID
+	UserID      uuid.UUID
+	Email       string
+	FullName    string
+	CountryCode string
+	CreatedAt   time.Time
+}

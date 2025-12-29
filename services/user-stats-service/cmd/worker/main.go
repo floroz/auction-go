@@ -11,6 +11,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/joho/godotenv"
 	amqp "github.com/rabbitmq/amqp091-go"
+	"golang.org/x/sync/errgroup"
 
 	pkgdb "github.com/floroz/gavel/pkg/database"
 	"github.com/floroz/gavel/services/user-stats-service/internal/adapters/database"
@@ -81,16 +82,29 @@ func main() {
 	}
 	defer amqpConn.Close()
 
-	// 4. Start Consumer
-	consumer := events.NewBidConsumer(amqpConn, statsService, logger)
-	logger.Info("Starting bid consumer...")
-	if err := consumer.Run(ctx); err != nil {
-		logger.Error("Consumer failed", "error", err)
+	// 4. Start Consumers
+	bidConsumer := events.NewBidConsumer(amqpConn, statsService, logger)
+	userConsumer := events.NewUserConsumer(amqpConn, statsService, logger)
+
+	g, gCtx := errgroup.WithContext(ctx)
+
+	g.Go(func() error {
+		logger.Info("Starting bid consumer...")
+		return bidConsumer.Run(gCtx)
+	})
+
+	g.Go(func() error {
+		logger.Info("Starting user consumer...")
+		return userConsumer.Run(gCtx)
+	})
+
+	if err := g.Wait(); err != nil {
+		logger.Error("Consumers failed", "error", err)
 		// Don't exit here immediately if context was canceled?
 		// Run returns nil on context cancel.
 		if ctx.Err() == nil {
 			os.Exit(1)
 		}
 	}
-	logger.Info("User stats consumer stopped")
+	logger.Info("User stats consumers stopped")
 }
