@@ -36,6 +36,24 @@ def deploy_helm(name, repo_name, repo_url, chart, namespace, values_files=[], ve
   )
 
 # =============================================================================
+# 0. Secrets & Keys
+# =============================================================================
+
+local_resource(
+  'generate_keys',
+  cmd='scripts/generate-dev-keys.sh',
+  deps=['scripts/generate-dev-keys.sh']
+)
+
+# Create secret if it doesn't exist.
+# We use a shell command to check existence to avoid erroring if it already exists.
+local_resource(
+  'create_auth_keys_secret',
+  cmd='kubectl get secret auth-keys >/dev/null 2>&1 || kubectl create secret generic auth-keys --from-file=private.pem=.data/keys/private.pem --from-file=public.pem=.data/keys/public.pem',
+  resource_deps=['generate_keys']
+)
+
+# =============================================================================
 # 1. Infrastructure (Helm + Manifests)
 # =============================================================================
 
@@ -56,6 +74,15 @@ deploy_helm('nginx-ingress',
   set_string_args=[
     'controller.nodeSelector.ingress-ready=true',
   ]
+)
+
+# Postgres Auth
+deploy_helm('postgres-auth',
+  repo_name='bitnami',
+  repo_url='https://charts.bitnami.com/bitnami',
+  chart='postgresql',
+  namespace='default',
+  values_files=['deploy/k8s/infra/values-postgres-auth.yaml']
 )
 
 # Postgres Bids
@@ -93,6 +120,29 @@ deploy_helm('redis',
 # =============================================================================
 # 2. Application Services (Helm Charts)
 # =============================================================================
+
+# Auth Service
+docker_build('auth-service',
+  context='.',
+  dockerfile='services/auth-service/Dockerfile',
+  ignore=['frontend', 'docs']
+)
+
+auth_service_yaml = helm(
+    './deploy/charts/auth-service',
+    name='auth-service',
+    values=['./deploy/charts/auth-service/values.yaml']
+)
+k8s_yaml(auth_service_yaml)
+
+k8s_resource('auth-service-migrate', 
+  labels=['migrations'], 
+  resource_deps=['postgres-auth']
+)
+k8s_resource('auth-service-api', 
+  labels=['app'], 
+  resource_deps=['postgres-auth', 'auth-service-migrate', 'create_auth_keys_secret']
+)
 
 # Bid Service
 docker_build('bid-service',

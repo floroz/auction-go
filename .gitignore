@@ -23,3 +23,6 @@ internal/pb/
 # Environment files
 .env
 .env.local
+
+# Keys
+.data/keys/
