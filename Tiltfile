@@ -1,7 +1,7 @@
 # Tiltfile
 
 # Helper to deploy helm charts
-def deploy_helm(name, repo_name, repo_url, chart, namespace, values_files=[], version=None, set_args=[], set_string_args=[], resource_deps=[]):
+def deploy_helm(name, repo_name, repo_url, chart, namespace, values_files=[], version=None, set_args=[], set_string_args=[], resource_deps=[], labels=[]):
   flags = []
   if version:
     flags.append("--version " + version)
@@ -32,7 +32,8 @@ def deploy_helm(name, repo_name, repo_url, chart, namespace, values_files=[], ve
     name,
     cmd=cmd,
     deps=values_files,
-    resource_deps=resource_deps
+    resource_deps=resource_deps,
+    labels=labels
   )
 
 # =============================================================================
@@ -43,7 +44,7 @@ local_resource(
   'generate_keys',
   cmd='scripts/generate-dev-keys.sh',
   deps=['scripts/generate-dev-keys.sh'],
-  labels=['jobs']
+  labels=['dev-only']
 )
 
 # Create secret if it doesn't exist.
@@ -51,7 +52,8 @@ local_resource(
 local_resource(
   'create_auth_keys_secret',
   cmd='kubectl get secret auth-keys >/dev/null 2>&1 || kubectl create secret generic auth-keys --from-file=private.pem=.data/keys/private.pem --from-file=public.pem=.data/keys/public.pem',
-  resource_deps=['generate_keys']
+  resource_deps=['generate_keys'],
+  labels=['dev-only']
 )
 
 # =============================================================================
@@ -74,7 +76,8 @@ deploy_helm('nginx-ingress',
   ],
   set_string_args=[
     'controller.nodeSelector.ingress-ready=true',
-  ]
+  ],
+  labels=['infra']
 )
 
 # Postgres Auth
@@ -83,7 +86,8 @@ deploy_helm('postgres-auth',
   repo_url='https://charts.bitnami.com/bitnami',
   chart='postgresql',
   namespace='default',
-  values_files=['deploy/k8s/infra/values-postgres-auth.yaml']
+  values_files=['deploy/k8s/infra/values-postgres-auth.yaml'],
+  labels=['db']
 )
 
 # Postgres Bids
@@ -92,7 +96,8 @@ deploy_helm('postgres-bids',
   repo_url='https://charts.bitnami.com/bitnami',
   chart='postgresql',
   namespace='default',
-  values_files=['deploy/k8s/infra/values-postgres-bids.yaml']
+  values_files=['deploy/k8s/infra/values-postgres-bids.yaml'],
+  labels=['db']
 )
 
 # Postgres Stats
@@ -101,7 +106,8 @@ deploy_helm('postgres-stats',
   repo_url='https://charts.bitnami.com/bitnami',
   chart='postgresql',
   namespace='default',
-  values_files=['deploy/k8s/infra/values-postgres-stats.yaml']
+  values_files=['deploy/k8s/infra/values-postgres-stats.yaml'],
+  labels=['db']
 )
 
 # RabbitMQ (using direct manifest - Bitnami images have limited free availability since Aug 2025)
@@ -115,7 +121,8 @@ deploy_helm('redis',
   repo_url='https://charts.bitnami.com/bitnami',
   chart='redis',
   namespace='default',
-  values_files=['deploy/k8s/infra/values-redis.yaml']
+  values_files=['deploy/k8s/infra/values-redis.yaml'],
+  labels=['infra']
 )
 
 # =============================================================================
