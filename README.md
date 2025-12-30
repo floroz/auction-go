@@ -33,7 +33,7 @@ The system leverages a decoupled **Ports & Adapters (Hexagonal)** architecture, 
 ```mermaid
 graph TD
     User((User)) -->|Browser| Ingress{NGINX Ingress}
-    Ingress -->|app.gavel.local| Frontend[React Frontend (SSR Node/Nitro)]
+    Ingress -->|app.gavel.local| Frontend["React Frontend (SSR Node/Nitro)"]
     Ingress -->|api.gavel.local/auth.v1...| AuthAPI
     Ingress -- "Bearer JWT (Claims)" --> BidAPI
     Ingress -- "Bearer JWT (Claims)" --> StatsAPI
