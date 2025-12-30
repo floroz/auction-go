@@ -1,4 +1,4 @@
-# 🔨 Gavel: High-Performance Real-Time Auction System
+# 🔨 Gavel: High-Performance Distributed Auction System
 
 [![Go Version](https://img.shields.io/badge/Go-1.25+-00ADD8?style=flat-square&logo=go)](https://go.dev/)
 [![React](https://img.shields.io/badge/React-19-61DAFB?style=flat-square&logo=react)](https://react.dev/)
