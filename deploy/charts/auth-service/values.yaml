@@ -6,7 +6,7 @@ image:
 ingress:
   enabled: true
   className: nginx
-  host: api.auction.local
+  host: api.gavel.local
 
 config:
   authDbUrl: "postgres://user:password@postgres-auth-postgresql:5432/auth_db?sslmode=disable"

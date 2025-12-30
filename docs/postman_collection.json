@@ -23,7 +23,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://api.auction.local/auth.v1.AuthService/Register",
+							"raw": "http://api.gavel.local/auth.v1.AuthService/Register",
 							"protocol": "http",
 							"host": [
 								"api",
@@ -68,7 +68,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://api.auction.local/auth.v1.AuthService/Login",
+							"raw": "http://api.gavel.local/auth.v1.AuthService/Login",
 							"protocol": "http",
 							"host": [
 								"api",
@@ -104,7 +104,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://api.auction.local/auth.v1.AuthService/GetProfile",
+							"raw": "http://api.gavel.local/auth.v1.AuthService/GetProfile",
 							"protocol": "http",
 							"host": [
 								"api",
@@ -149,7 +149,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://api.auction.local/auth.v1.AuthService/Refresh",
+							"raw": "http://api.gavel.local/auth.v1.AuthService/Refresh",
 							"protocol": "http",
 							"host": [
 								"api",
@@ -191,7 +191,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://api.auction.local/bids.v1.BidService/PlaceBid",
+							"raw": "http://api.gavel.local/bids.v1.BidService/PlaceBid",
 							"protocol": "http",
 							"host": [
 								"api",
@@ -226,7 +226,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://api.auction.local/userstats.v1.UserStatsService/GetUserStats",
+							"raw": "http://api.gavel.local/userstats.v1.UserStatsService/GetUserStats",
 							"protocol": "http",
 							"host": [
 								"api",

@@ -6,7 +6,7 @@ image:
 ingress:
   enabled: true
   className: nginx
-  host: api.auction.local
+  host: api.gavel.local
 
 config:
   bidDbUrl: "postgres://user:password@postgres-bids-postgresql:5432/bid_db?sslmode=disable"
