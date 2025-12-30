@@ -32,13 +32,24 @@ The system leverages a decoupled **Ports & Adapters (Hexagonal)** architecture, 
 
 ```mermaid
 graph TD
-    User((User)) -->|Browser| Ingress{NGINX Ingress}
-    Ingress -->|app.gavel.local| Frontend["React Frontend (SSR Node/Nitro)"]
-    Ingress -->|api.gavel.local/auth.v1...| AuthAPI
-    Ingress -- "Bearer JWT (Claims)" --> BidAPI
-    Ingress -- "Bearer JWT (Claims)" --> StatsAPI
+    subgraph "Client Side"
+        Client[User / React Client]
+    end
+
+    Client -->|1. Request Page| Ingress{NGINX Ingress}
+    Client -->|2. ConnectRPC| Ingress
 
     subgraph "Kubernetes Cluster"
+        %% Ingress Handling
+        subgraph "Backend For Frontend (BFF) Domain"
+            SSR[Frontend Nitro Service]
+        end
+
+        Ingress -->|Render HTML SSR/ISR| SSR
+        Ingress -->|api.gavel.local| AuthAPI
+        Ingress -->|api.gavel.local| BidAPI
+        Ingress -->|api.gavel.local| StatsAPI
+
         %% Shared Infrastructure
         RMQ(RabbitMQ)
         Redis(Redis Cache)
@@ -57,11 +68,6 @@ graph TD
             StatsAPI[User Stats API] -->|Read| StatsDB[(Postgres: stats_db)]
             StatsWorker[User Stats Consumer] -->|Update User Totals| StatsDB
         end
-
-        %% Routing
-        Ingress -->|api.gavel.local/auth.v1...| AuthAPI
-        Ingress -- "Bearer JWT (Claims)" --> BidAPI
-        Ingress -- "Bearer JWT (Claims)" --> StatsAPI
 
         %% Event Flow & Caching
         AuthAPI -- Publish UserCreated --> RMQ
