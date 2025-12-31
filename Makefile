@@ -103,23 +103,6 @@ proto-gen: install-protoc ## Generate Go code from protobuf files
 		api/proto/auth/v1/auth_service.proto
 	@echo "Protobuf code generated in pkg/proto/"
 
-.PHONY: proto-gen-ts
-proto-gen-ts: install-protoc ## Generate TypeScript code for frontend
-	@mkdir -p frontend/proto
-	@cd frontend && npm install
-	tools/protoc \
-		--plugin=protoc-gen-es=./frontend/node_modules/.bin/protoc-gen-es \
-		--plugin=protoc-gen-connect-es=./frontend/node_modules/.bin/protoc-gen-connect-es \
-		--es_out=frontend/proto \
-		--es_opt=target=ts \
-		--connect-es_out=frontend/proto \
-		--connect-es_opt=target=ts \
-		--proto_path=api/proto \
-		--proto_path=tools/include \
-		api/proto/bids/v1/bid_service.proto \
-		api/proto/userstats/v1/user_stats_service.proto
-	@echo "TypeScript code generated in frontend/proto/"
-
 .PHONY: lint
 lint: ## Run linter
 	@if ! command -v golangci-lint >/dev/null 2>&1; then \

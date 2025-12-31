@@ -178,7 +178,7 @@ Run the verification script to check service health:
 | `make cluster` | Create/Update Kind cluster + Registry |
 | `make cluster-delete` | Destroy Cluster + Registry |
 | `make proto-gen` | Rebuild Protobuf definitions (Go) |
-| `make proto-gen-ts` | Generate TypeScript clients |
+| `pnpm --dir frontend proto:gen` | Generate TypeScript clients from Protobuf |
 | `make lint` | Run linters |
 | `make test` | Run full test suite |
 

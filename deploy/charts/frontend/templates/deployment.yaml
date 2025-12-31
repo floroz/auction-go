@@ -23,13 +23,11 @@ spec:
           env:
             - name: NODE_ENV
               value: "production"
-            - name: VITE_ASSET_URL
-              value: {{ .Values.config.assetUrl | quote }}
           readinessProbe:
             httpGet:
               path: /
               port: 3000
-            initialDelaySeconds: 5
+            initialDelaySeconds: 15
             periodSeconds: 10
             timeoutSeconds: 5
             failureThreshold: 3
@@ -37,10 +35,9 @@ spec:
             httpGet:
               path: /
               port: 3000
-            initialDelaySeconds: 10
+            initialDelaySeconds: 30
             periodSeconds: 20
             timeoutSeconds: 5
             failureThreshold: 3
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
-

@@ -8,9 +8,6 @@ ingress:
   className: nginx
   host: app.gavel.local
 
-config:
-  assetUrl: ""
-
 resources:
   requests:
     memory: "128Mi"
