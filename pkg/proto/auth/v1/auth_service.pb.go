@@ -29,6 +29,7 @@ type RegisterRequest struct {
 	Password      string                 `protobuf:"bytes,2,opt,name=password,proto3" json:"password,omitempty"`
 	FullName      string                 `protobuf:"bytes,3,opt,name=full_name,json=fullName,proto3" json:"full_name,omitempty"`
 	CountryCode   string                 `protobuf:"bytes,4,opt,name=country_code,json=countryCode,proto3" json:"country_code,omitempty"` // ISO 3166-1 alpha-2
+	PhoneNumber   string                 `protobuf:"bytes,5,opt,name=phone_number,json=phoneNumber,proto3" json:"phone_number,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -87,6 +88,13 @@ func (x *RegisterRequest) GetFullName() string {
 func (x *RegisterRequest) GetCountryCode() string {
 	if x != nil {
 		return x.CountryCode
+	}
+	return ""
+}
+
+func (x *RegisterRequest) GetPhoneNumber() string {
+	if x != nil {
+		return x.PhoneNumber
 	}
 	return ""
 }
@@ -595,12 +603,13 @@ var File_auth_v1_auth_service_proto protoreflect.FileDescriptor
 
 const file_auth_v1_auth_service_proto_rawDesc = "" +
 	"\n" +
-	"\x1aauth/v1/auth_service.proto\x12\aauth.v1\x1a\x1fgoogle/protobuf/timestamp.proto\"\x83\x01\n" +
+	"\x1aauth/v1/auth_service.proto\x12\aauth.v1\x1a\x1fgoogle/protobuf/timestamp.proto\"\xa6\x01\n" +
 	"\x0fRegisterRequest\x12\x14\n" +
 	"\x05email\x18\x01 \x01(\tR\x05email\x12\x1a\n" +
 	"\bpassword\x18\x02 \x01(\tR\bpassword\x12\x1b\n" +
 	"\tfull_name\x18\x03 \x01(\tR\bfullName\x12!\n" +
-	"\fcountry_code\x18\x04 \x01(\tR\vcountryCode\"+\n" +
+	"\fcountry_code\x18\x04 \x01(\tR\vcountryCode\x12!\n" +
+	"\fphone_number\x18\x05 \x01(\tR\vphoneNumber\"+\n" +
 	"\x10RegisterResponse\x12\x17\n" +
 	"\auser_id\x18\x01 \x01(\tR\x06userId\"~\n" +
 	"\fLoginRequest\x12\x14\n" +

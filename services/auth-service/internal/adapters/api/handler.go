@@ -34,6 +34,7 @@ func (h *AuthServiceHandler) Register(
 		req.Msg.Email,
 		req.Msg.Password,
 		req.Msg.FullName,
+		req.Msg.PhoneNumber,
 		req.Msg.CountryCode,
 	)
 	if err != nil {

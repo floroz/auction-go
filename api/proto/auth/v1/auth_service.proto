@@ -29,6 +29,7 @@ message RegisterRequest {
   string password = 2;
   string full_name = 3;
   string country_code = 4; // ISO 3166-1 alpha-2
+  string phone_number = 5;
 }
 
 message RegisterResponse {

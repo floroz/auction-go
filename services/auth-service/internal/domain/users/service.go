@@ -49,8 +49,8 @@ func NewService(
 	}
 }
 
-func (s *Service) Register(ctx context.Context, email, password, fullName, countryCode string) (*User, error) {
-	if err := validateUser(email, password, fullName, countryCode); err != nil {
+func (s *Service) Register(ctx context.Context, email, password, fullName, phoneNumber, countryCode string) (*User, error) {
+	if err := validateUser(email, password, fullName, phoneNumber, countryCode); err != nil {
 		return nil, fmt.Errorf("%w: %v", ErrInvalidInput, err)
 	}
 
@@ -76,6 +76,7 @@ func (s *Service) Register(ctx context.Context, email, password, fullName, count
 		Email:        email,
 		PasswordHash: hash,
 		FullName:     fullName,
+		PhoneNumber:  phoneNumber,
 		CountryCode:  countryCode,
 		CreatedAt:    now,
 		UpdatedAt:    now,
@@ -289,7 +290,7 @@ func hashToken(token string) []byte {
 	return hash[:]
 }
 
-func validateUser(email, password, fullName, countryCode string) error {
+func validateUser(email, password, fullName, phoneNumber, countryCode string) error {
 	if !strings.Contains(email, "@") || len(email) < 3 {
 		return errors.New("invalid email format")
 	}
@@ -298,6 +299,9 @@ func validateUser(email, password, fullName, countryCode string) error {
 	}
 	if strings.TrimSpace(fullName) == "" {
 		return errors.New("full name cannot be empty")
+	}
+	if strings.TrimSpace(phoneNumber) == "" {
+		return errors.New("phone number cannot be empty")
 	}
 	if len(countryCode) != 2 || countryCode != strings.ToUpper(countryCode) {
 		return errors.New("country code must be 2 uppercase letters (ISO 3166-1 alpha-2)")

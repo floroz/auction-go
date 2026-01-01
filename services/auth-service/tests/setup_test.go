@@ -78,9 +78,9 @@ func setupAuthApp(t *testing.T, pool *pgxpool.Pool) (authv1connect.AuthServiceCl
 func verifyUserExists(t *testing.T, pool *pgxpool.Pool, email string) *users.User {
 	t.Helper()
 	var user users.User
-	query := `SELECT id, email, full_name, country_code FROM users WHERE email = $1`
+	query := `SELECT id, email, full_name, phone_number, country_code FROM users WHERE email = $1`
 	row := pool.QueryRow(context.Background(), query, email)
-	err := row.Scan(&user.ID, &user.Email, &user.FullName, &user.CountryCode)
+	err := row.Scan(&user.ID, &user.Email, &user.FullName, &user.PhoneNumber, &user.CountryCode)
 	if err != nil {
 		return nil
 	}

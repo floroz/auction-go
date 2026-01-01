@@ -32,7 +32,7 @@ type EventPublisher interface {
 }
 
 type AuthService interface {
-	Register(ctx context.Context, email, password, fullName, countryCode string) (*User, error)
+	Register(ctx context.Context, email, password, fullName, phoneNumber, countryCode string) (*User, error)
 	Login(ctx context.Context, email, password, userAgent, ip string) (accessToken, refreshToken string, err error)
 	Refresh(ctx context.Context, refreshToken, userAgent, ip string) (newAccess, newRefresh string, err error)
 	Logout(ctx context.Context, refreshToken string) error
