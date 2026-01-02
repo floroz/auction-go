@@ -38,7 +38,12 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
         content: 'width=device-width, initial-scale=1',
       },
       {
-        title: 'TanStack Start Starter',
+        title: 'Gavel - Online Auction Platform',
+      },
+      {
+        name: 'description',
+        content:
+          'Gavel is the premier online auction platform for buying and selling unique items.',
       },
     ],
     links: [
