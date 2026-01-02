@@ -6,7 +6,8 @@ image:
 ingress:
   enabled: true
   className: nginx
-  host: api.gavel.local
+  # Empty host allows matching requests with any Host header (including "localhost" for port-forwarding)
+  host: ""
   cors:
     # DEV ONLY: Allow all origins for local development.
     # In production (values-prod.yaml), set this to the actual domain (e.g. "https://app.gavel.com")
