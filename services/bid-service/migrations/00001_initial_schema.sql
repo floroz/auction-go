@@ -19,6 +19,6 @@ CREATE TABLE bids (
 );
 
 -- +goose Down
-DROP TABLE bids;
-DROP TABLE items;
+DROP TABLE IF EXISTS bids;
+DROP TABLE IF EXISTS items;
 

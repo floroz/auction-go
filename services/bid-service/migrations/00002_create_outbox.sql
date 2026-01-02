@@ -11,5 +11,5 @@ CREATE TABLE outbox_events (
 );
 
 -- +goose Down
-DROP TABLE outbox_events;
-DROP TYPE outbox_status;
+DROP TABLE IF EXISTS outbox_events;
+DROP TYPE IF EXISTS outbox_status;

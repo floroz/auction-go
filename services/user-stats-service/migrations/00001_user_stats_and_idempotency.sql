@@ -14,6 +14,6 @@ CREATE TABLE processed_events (
 );
 
 -- +goose Down
-DROP TABLE processed_events;
-DROP TABLE user_stats;
+DROP TABLE IF EXISTS processed_events;
+DROP TABLE IF EXISTS user_stats;
 

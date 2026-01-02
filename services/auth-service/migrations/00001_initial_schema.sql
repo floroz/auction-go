@@ -25,6 +25,6 @@ CREATE TABLE refresh_tokens (
 CREATE INDEX idx_refresh_tokens_user_id ON refresh_tokens(user_id);
 
 -- +goose Down
-DROP TABLE refresh_tokens;
-DROP TABLE users;
+DROP TABLE IF EXISTS refresh_tokens;
+DROP TABLE IF EXISTS users;
 

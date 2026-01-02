@@ -224,3 +224,61 @@ k8s_resource('frontend',
   labels=['frontend'],
   resource_deps=['nginx-ingress']
 )
+
+# =============================================================================
+# DEV ONLY: Database Down Migrations
+# =============================================================================
+# Change these versions when you need to migrate down to a specific version.
+# Then trigger the corresponding resource in Tilt UI.
+DB_DOWN_VERSION_AUTH = 0
+DB_DOWN_VERSION_BIDS = 0
+DB_DOWN_VERSION_STATS = 0
+
+# Reset ALL databases to version 0
+local_resource(
+  'db-reset-all',
+  cmd='''
+    set -e
+    echo "=== Resetting auth-service DB ===" && \
+    kubectl exec sts/postgres-auth-postgresql -- sh -c "export PGPASSWORD=password && psql -U user -d auth_db -c 'DROP SCHEMA public CASCADE; CREATE SCHEMA public;'" && \
+    echo "=== Resetting bid-service DB ===" && \
+    kubectl exec sts/postgres-bids-postgresql -- sh -c "export PGPASSWORD=password && psql -U user -d bid_db -c 'DROP SCHEMA public CASCADE; CREATE SCHEMA public;'" && \
+    echo "=== Resetting user-stats-service DB ===" && \
+    kubectl exec sts/postgres-stats-postgresql -- sh -c "export PGPASSWORD=password && psql -U user -d stats_db -c 'DROP SCHEMA public CASCADE; CREATE SCHEMA public;'" && \
+    echo "=== All databases reset to version 0. Run 'tilt trigger' on migration jobs to re-apply. ==="
+  ''',
+  auto_init=False,
+  trigger_mode=TRIGGER_MODE_MANUAL,
+  labels=['dev-only'],
+  resource_deps=['postgres-auth', 'postgres-bids', 'postgres-stats']
+)
+
+# Down auth-service to specific version
+local_resource(
+  'db-down-auth',
+  cmd='kubectl exec deploy/auth-service-api -- /app/goose -dir /app/migrations postgres "postgres://user:password@postgres-auth-postgresql:5432/auth_db?sslmode=disable" down-to ' + str(DB_DOWN_VERSION_AUTH),
+  auto_init=False,
+  trigger_mode=TRIGGER_MODE_MANUAL,
+  labels=['dev-only'],
+  resource_deps=['auth-service-api']
+)
+
+# Down bid-service to specific version
+local_resource(
+  'db-down-bids',
+  cmd='kubectl exec deploy/bid-service-api -- /app/goose -dir /app/migrations postgres "postgres://user:password@postgres-bids-postgresql:5432/bid_db?sslmode=disable" down-to ' + str(DB_DOWN_VERSION_BIDS),
+  auto_init=False,
+  trigger_mode=TRIGGER_MODE_MANUAL,
+  labels=['dev-only'],
+  resource_deps=['bid-service-api']
+)
+
+# Down user-stats-service to specific version
+local_resource(
+  'db-down-stats',
+  cmd='kubectl exec deploy/user-stats-service-api -- /app/goose -dir /app/migrations postgres "postgres://user:password@postgres-stats-postgresql:5432/stats_db?sslmode=disable" down-to ' + str(DB_DOWN_VERSION_STATS),
+  auto_init=False,
+  trigger_mode=TRIGGER_MODE_MANUAL,
+  labels=['dev-only'],
+  resource_deps=['user-stats-service-api']
+)
