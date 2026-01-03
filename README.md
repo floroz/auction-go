@@ -32,42 +32,43 @@ The system leverages a decoupled **Ports & Adapters (Hexagonal)** architecture, 
 
 ```mermaid
 graph TD
-    subgraph "Client Side"
+    subgraph ClientSide ["Client Side"]
         Client[User / React Client]
     end
 
-    Client -->|1. Request Page| Ingress{NGINX Ingress}
-    Client -->|2. ConnectRPC| Ingress
+    Client -->|1. TanStack Server Actions| Ingress{NGINX Ingress}
 
-    subgraph "Kubernetes Cluster"
+    subgraph K8s ["Kubernetes Cluster"]
         %% Ingress Handling
-        subgraph "Backend For Frontend (BFF) Domain"
-            SSR[Frontend Nitro Service]
+        subgraph BFF_Domain ["Backend For Frontend Domain"]
+            BFF[Frontend Node Server]
         end
 
-        Ingress -->|Render HTML SSR/ISR| SSR
-        Ingress -->|api.gavel.local| AuthAPI
-        Ingress -->|api.gavel.local| BidAPI
-        Ingress -->|api.gavel.local| StatsAPI
+        Ingress -->|Proxy| BFF
 
         %% Shared Infrastructure
         RMQ(RabbitMQ)
         Redis(Redis Cache)
 
-        subgraph "Identity Domain"
+        subgraph Identity ["Identity Domain"]
             AuthAPI[Auth Service] -->|Tx: Save User + Outbox Event| AuthDB[(Postgres: auth_db)]
             AuthAPI -->|Poll Outbox - Background| AuthDB
         end
 
-        subgraph "Bid Domain"
+        subgraph Bids ["Bid Domain"]
             BidAPI[Bid Service API] -->|Tx: Save Bid + Outbox Event| BidDB[(Postgres: bid_db)]
             BidWorker[Bid Outbox Worker] -->|Poll Outbox Table| BidDB
         end
         
-        subgraph "Analytics Domain"
+        subgraph Analytics ["Analytics Domain"]
             StatsAPI[User Stats API] -->|Read| StatsDB[(Postgres: stats_db)]
             StatsWorker[User Stats Consumer] -->|Update User Totals| StatsDB
         end
+
+        %% Service Communication (gRPC)
+        BFF -->|gRPC| AuthAPI
+        BFF -->|gRPC| BidAPI
+        BFF -->|gRPC| StatsAPI
 
         %% Event Flow & Caching
         AuthAPI -- Publish UserCreated --> RMQ
@@ -79,6 +80,17 @@ graph TD
         BidAPI -.->|Cache| Redis
     end
 ```
+
+---
+
+## 🔐 Authentication Strategy (BFF)
+
+We implement the **Backend for Frontend (BFF)** pattern to secure user sessions and support Server-Side Rendering (SSR).
+
+*   **Zero Trust**: Backend microservices (`auth-service`, `bid-service`, etc.) are **private** and not exposed to the public internet. They accept requests only from the BFF.
+*   **HttpOnly Cookies**: Access and Refresh tokens are stored in secure, HttpOnly cookies. The browser never sees the raw tokens, preventing XSS attacks.
+*   **Server Functions**: The frontend calls TanStack Start "Server Functions" which act as a proxy. The Node.js server attaches the tokens to the downstream gRPC requests.
+*   **Transparent Refresh**: If a microservice returns `401 Unauthorized`, the BFF automatically refreshes the token using the refresh cookie and retries the request, without the client needing to handle complex logic.
 
 ---
 
@@ -97,10 +109,11 @@ graph TD
 
 ## 🔌 API & Communication
 
-We use **ConnectRPC** for the service-to-frontend API. This provides a "best of both worlds" approach:
+We use **ConnectRPC** for the service-to-frontend API, adapted for the BFF pattern:
 
-1.  **Frontend**: Auto-generated, type-safe TypeScript clients (Protocol Buffers).
-2.  **Testing**: Standard JSON over HTTP (curl / Postman) without needing special tools.
+1.  **Browser → BFF**: TanStack Start **Server Functions** act as the primary API surface for the client. They handle cookie-based authentication transparently.
+2.  **BFF → Services**: The Node.js server uses **ConnectRPC** clients (Protocol Buffers) to communicate with the internal, private microservices.
+3.  **Testing**: Backend services still support standard JSON over HTTP, making them easy to test with curl/Postman (via `localhost` access or port-forwarding).
 
 ### Testing Endpoints (JSON)
 

@@ -356,3 +356,60 @@ BFF ──Bearer Token──▶ bid-service
 *   **OWASP**: [Local Storage Security](https://cheatsheetseries.owasp.org/cheatsheets/HTML5_Security_Cheat_Sheet.html#local-storage)
 *   **Curity**: [The Token Handler Pattern](https://curity.io/resources/learn/token-handler-pattern/)
 *   **TanStack Start**: [Server Functions](https://tanstack.com/start/latest/docs/framework/react/server-functions)
+
+## 11. Implementation Milestones
+
+### Milestone 1: Environment & Key Infrastructure
+**Goal**: Ensure local and k8s environments have the necessary keys for JWT signing and validation.
+
+*   [ ] **Generate Keys**: Create RSA key pair for JWT signing (if not exists).
+*   [ ] **Auth Service Config**: Configure `auth-service` to use the private key for signing.
+*   [ ] **BFF RPC Setup**: Create `src/server/rpc-internal.ts` with ConnectRPC clients for internal backend communication.
+*   [ ] **Environment Variables**: Configure `AUTH_SERVICE_URL`, `BID_SERVICE_URL`, etc., in the frontend environment.
+
+**Validation**:
+*   `auth-service` starts successfully with the private key.
+*   Frontend server starts and `rpc-internal.ts` can initialize clients (even if not connecting yet).
+
+### Milestone 2: BFF Core (Auth & Cookies)
+**Goal**: Implement server functions for Login/Register and handle HttpOnly cookies.
+
+*   [ ] **Cookie Logic**: Implement `src/server/cookies.ts` (set/get/clear with `HttpOnly`, `Secure`, `SameSite=Strict`).
+*   [ ] **Auth API**: Implement `src/server/api/auth.ts`:
+    *   `loginFn`: Calls backend -> Sets cookies.
+    *   `registerFn`: Calls backend -> Sets cookies.
+    *   `logoutFn`: Calls backend (revoke) -> Clears cookies.
+*   [ ] **Frontend Forms**: Update Login and Register forms to use these server functions.
+
+**Validation**:
+*   Login form submits successfully.
+*   Network tab shows `__Host-access_token` and `__Host-refresh_token` cookies being set.
+*   `document.cookie` in browser console is empty (cookies are HttpOnly).
+*   Logout clears the cookies.
+
+### Milestone 3: Route Protection & SSR
+**Goal**: Protect routes and ensure authenticated state persists on reload (SSR).
+
+*   [ ] **Session Fetching**: Implement `getAuthSession` in `src/server/auth.ts` (validates token, returns user).
+*   [ ] **Route Context**: Update `__root.tsx` `beforeLoad` to populate auth context from cookies.
+*   [ ] **Token Refresh**: Implement logic to catch 401s in `getAuthSession` or middleware, call Refresh, and update cookies.
+*   [ ] **Redirects**: Add redirects to `/login` for protected routes when unauthenticated.
+
+**Validation**:
+*   Accessing `/dashboard` (protected) redirects to `/login` if logged out.
+*   Refreshing the page while logged in keeps the user logged in (no flash of guest content).
+*   Manually deleting `__Host-access_token` (but keeping refresh token) results in a new access token being set transparently on the next request.
+
+### Milestone 4: Full Migration & Cleanup
+**Goal**: Route all remaining traffic through BFF and close public access to backends.
+
+*   [ ] **Bid/Stats API**: Create server functions for other domains (e.g., `placeBidFn`) using `rpc-internal.ts`.
+*   [ ] **Remove Client RPC**: Delete or refactor `src/lib/rpc.ts` to stop using direct browser-to-backend calls.
+*   [ ] **Ingress Cleanup**: Remove Kubernetes Ingress resources for `auth-service`, `bid-service`, and `user-stats-service`.
+*   [ ] **Network Policy**: (Optional) Enforce network policies so backends only accept traffic from the Frontend pod.
+
+**Validation**:
+*   All app features (bidding, stats) work correctly.
+*   `curl https://auth.example.com` fails (public access blocked).
+*   `curl https://bid.example.com` fails.
+*   Only `https://frontend.example.com` is accessible.
