@@ -207,18 +207,19 @@ k8s_resource('user-stats-service-worker',
   resource_deps=['postgres-stats', 'rabbitmq', 'user-stats-service-migrate']
 )
 
-# Frontend
+
+# Frontend BFF (Next.js)
 docker_build('frontend',
   context='frontend',
   dockerfile='frontend/Dockerfile'
 )
 
-frontend_yaml = helm(
+frontend_v2_yaml = helm(
     './deploy/charts/frontend',
     name='frontend',
     values=['./deploy/charts/frontend/values.yaml']
 )
-k8s_yaml(frontend_yaml)
+k8s_yaml(frontend_v2_yaml)
 
 k8s_resource('frontend',
   labels=['frontend'],

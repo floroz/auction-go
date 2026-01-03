@@ -7,10 +7,8 @@
   "tags": ["-lintignore"],
   "ignoreDependencies": [
     "@bufbuild/protoc-gen-es",
-    "@tanstack/eslint-config",
     "@testing-library/dom",
-    "@testing-library/react",
-    "web-vitals"
+    "@testing-library/react"
   ],
   "ignoreBinaries": ["eslint"]
 }
