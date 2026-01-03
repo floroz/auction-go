@@ -2,7 +2,7 @@
 
 [![Go Version](https://img.shields.io/badge/Go-1.25+-00ADD8?style=flat-square&logo=go)](https://go.dev/)
 [![React](https://img.shields.io/badge/React-19-61DAFB?style=flat-square&logo=react)](https://react.dev/)
-[![TanStack](https://img.shields.io/badge/TanStack-Start-FF4154?style=flat-square)](https://tanstack.com/)
+[![Next.js](https://img.shields.io/badge/Next.js-15-000000?style=flat-square&logo=next.js)](https://nextjs.org/)
 [![Kubernetes](https://img.shields.io/badge/Kubernetes-Latest-326CE5?style=flat-square&logo=kubernetes)](https://kubernetes.io/)
 [![Tilt](https://img.shields.io/badge/Tilt-Dev_Env-23C6C8?style=flat-square&logo=tilt)](https://tilt.dev/)
 [![Postgres](https://img.shields.io/badge/Postgres-16-336791?style=flat-square&logo=postgresql)](https://www.postgresql.org/)
@@ -36,12 +36,12 @@ graph TD
         Client[User / React Client]
     end
 
-    Client -->|1. TanStack Server Actions| Ingress{NGINX Ingress}
+    Client -->|1. Server Actions / RSC| Ingress{NGINX Ingress}
 
     subgraph K8s ["Kubernetes Cluster"]
         %% Ingress Handling
         subgraph BFF_Domain ["Backend For Frontend Domain"]
-            BFF[Frontend Node Server]
+            BFF[Next.js App Router<br/>SSR + Server Actions]
         end
 
         Ingress -->|Proxy| BFF
@@ -66,9 +66,9 @@ graph TD
         end
 
         %% Service Communication (gRPC)
-        BFF -->|gRPC| AuthAPI
-        BFF -->|gRPC| BidAPI
-        BFF -->|gRPC| StatsAPI
+        BFF -->|ConnectRPC| AuthAPI
+        BFF -->|ConnectRPC| BidAPI
+        BFF -->|ConnectRPC| StatsAPI
 
         %% Event Flow & Caching
         AuthAPI -- Publish UserCreated --> RMQ
@@ -89,31 +89,49 @@ We implement the **Backend for Frontend (BFF)** pattern to secure user sessions 
 
 *   **Zero Trust**: Backend microservices (`auth-service`, `bid-service`, etc.) are **private** and not exposed to the public internet. They accept requests only from the BFF.
 *   **HttpOnly Cookies**: Access and Refresh tokens are stored in secure, HttpOnly cookies. The browser never sees the raw tokens, preventing XSS attacks.
-*   **Server Functions**: The frontend calls TanStack Start "Server Functions" which act as a proxy. The Node.js server attaches the tokens to the downstream gRPC requests.
-*   **Transparent Refresh**: If a microservice returns `401 Unauthorized`, the BFF automatically refreshes the token using the refresh cookie and retries the request, without the client needing to handle complex logic.
+*   **Server Actions**: The frontend calls Next.js Server Actions which act as a secure proxy. The Node.js server attaches the tokens to the downstream ConnectRPC requests.
+*   **React Server Components**: Protected pages fetch data directly on the server, reading cookies and making authenticated backend calls before rendering HTML.
+*   **Transparent Refresh**: If a token is expired, the BFF automatically refreshes it using the refresh cookie and retries the request, without the client needing to handle complex logic.
+
+For detailed architecture documentation, see [docs/PLAN-AUTH-BFF.md](docs/PLAN-AUTH-BFF.md).
 
 ---
 
 ## 🛠 Tech Stack & Patterns
 
--   **Frontend**: [React 19, TanStack Start, Nitro (SSR), Tailwind, Shadcn](frontend/README.md)
+-   **Frontend**: [Next.js 15 (App Router), React 19, Server Components, Server Actions, Tailwind, Shadcn/ui](frontend/README.md)
 -   **Language**: Go 1.25+ (Generics, Context-driven)
 -   **Orchestration**: Kubernetes (Kind), Helm, Tilt, ctlptl
 -   **Database**: PostgreSQL (Raw `pgx` for maximum control over transactions)
 -   **Messaging**: RabbitMQ (Topic-based exchanges for decoupled scaling)
 -   **Caching**: Redis (Bidding leaderboards and item metadata)
--   **Protocol**: Protobuf for high-efficiency message serialization
+-   **Protocol**: Protobuf + ConnectRPC for high-efficiency, type-safe communication
 -   **Pattern**: Hexagonal Architecture (Clean Architecture)
 
 ---
 
 ## 🔌 API & Communication
 
-We use **ConnectRPC** for the service-to-frontend API, adapted for the BFF pattern:
+We use **ConnectRPC** for service-to-service communication, adapted for the BFF pattern:
 
-1.  **Browser → BFF**: TanStack Start **Server Functions** act as the primary API surface for the client. They handle cookie-based authentication transparently.
+1.  **Browser → BFF**: Next.js **Server Actions** handle mutations (login, place bid, etc.) with automatic cookie management. **React Server Components** fetch data for page rendering.
 2.  **BFF → Services**: The Node.js server uses **ConnectRPC** clients (Protocol Buffers) to communicate with the internal, private microservices.
 3.  **Testing**: Backend services still support standard JSON over HTTP, making them easy to test with curl/Postman (via `localhost` access or port-forwarding).
+
+### Communication Flow
+
+```mermaid
+graph LR
+    Browser[Browser]
+    BFF["Next.js BFF<br/>- RSC for reads<br/>- Actions for mutations"]
+    Services["Go Services<br/>(private)"]
+
+    Browser -->|"Server Actions<br/>(mutations)"| BFF
+    BFF -->|"HTML/JSON"| Browser
+    
+    BFF -->|ConnectRPC| Services
+    Services -->|Response| BFF
+```
 
 ### Testing Endpoints (JSON)
 

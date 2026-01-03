@@ -2,7 +2,7 @@
 
 ## 1. The Challenge
 
-Our application uses a microservices architecture with a dedicated **Auth Service** (Go/gRPC) and a **Frontend** built with TanStack Start (SSR/React).
+Our application uses a microservices architecture with a dedicated **Auth Service** (Go/gRPC) and a **Frontend** built with Next.js (App Router, SSR/React).
 
 We face three critical challenges with the traditional "Direct Browser-to-Microservice" authentication pattern:
 
@@ -19,7 +19,7 @@ In this architecture, the **Frontend Server (Node.js)** acts as a secure proxy b
 ### Key Concepts
 
 *   **HttpOnly Cookies**: The browser never sees the Access/Refresh tokens. It only holds encrypted/signed HttpOnly cookies containing the tokens.
-*   **Server Functions**: The browser calls TanStack Start server functions (e.g., `loginFn`, `placeBidFn`) instead of calling Microservices directly.
+*   **Server Actions**: The browser calls Next.js Server Actions (e.g., `loginAction`, `placeBidAction`) instead of calling Microservices directly.
 *   **Token Mediation**: The Frontend Server reads the cookies, attaches the `Authorization: Bearer <token>` header, and forwards the request to the gRPC services.
 *   **Server-Side Refresh**: If a microservice returns `401 Unauthorized`, the Frontend Server transparently calls `AuthService.Refresh`, updates the user's cookies, and retries the original request.
 
@@ -27,7 +27,7 @@ In this architecture, the **Frontend Server (Node.js)** acts as a secure proxy b
 
 ### A. Components
 
-1.  **Frontend Server (BFF)**: TanStack Start server functions handling the proxy logic.
+1.  **Frontend Server (BFF)**: Next.js App Router with Server Components and Server Actions handling the proxy logic.
 2.  **Internal Services**: `auth-service`, `bid-service`, `user-stats-service` (Not exposed publicly).
 3.  **Frontend Ingress**: The ONLY public entry point.
 
@@ -59,104 +59,156 @@ Browser ─────ConnectRPC────▶ bid-service (public)
 With BFF, backends become private. We need two distinct communication layers:
 
 ```
-Browser ───Server Functions──▶ BFF (public)
-BFF ────────ConnectRPC───────▶ Backend Services (private)
+Browser ───Server Actions───▶ BFF (public)
+BFF ────────ConnectRPC──────▶ Backend Services (private)
 ```
 
-### A. Browser → BFF: TanStack Server Functions
+### A. Browser → BFF: Next.js Server Actions
 
-**Why Server Functions (not ConnectRPC from browser)**:
+**Why Server Actions (not ConnectRPC from browser)**:
 - Automatic cookie handling (no manual `credentials: 'include'`)
-- Type-safe RPC built into TanStack Start
+- Type-safe with Zod validation
 - Same function callable from SSR and client hydration
 - No additional HTTP layer to maintain
+- Framework-native solution with excellent DX
 
 **Pattern**:
 
 ```typescript
-// src/server/api/auth.ts
-import { createServerFn } from '@tanstack/react-start'
-import { authClient } from './rpc-internal'
-import { setAuthCookies, getAuthCookies, clearAuthCookies } from './cookies'
+// app/actions/auth.ts
+"use server";
 
-export const loginFn = createServerFn({ method: 'POST' })
-  .validator((data: { email: string; password: string }) => data)
-  .handler(async ({ data }) => {
-    const response = await authClient.login({
-      email: data.email,
-      password: data.password,
-      // Extract from request headers
-      ipAddress: getClientIP(),
-      userAgent: getUserAgent(),
-    })
-    
-    // Set HttpOnly cookies (tokens never returned to browser)
-    setAuthCookies(response.accessToken, response.refreshToken)
-    
-    return { success: true }
-  })
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
+import { authClient } from "@/lib/rpc";
+import { loginInputSchema } from "@/shared/api/auth";
+
+export async function loginAction(formData: FormData) {
+  const parsed = loginInputSchema.safeParse({
+    email: formData.get("email"),
+    password: formData.get("password"),
+  });
+
+  if (!parsed.success) {
+    return { error: "Invalid credentials" };
+  }
+
+  const response = await authClient.login({
+    email: parsed.data.email,
+    password: parsed.data.password,
+    ipAddress: headers().get("x-forwarded-for") ?? "unknown",
+    userAgent: headers().get("user-agent") ?? "unknown",
+  });
+
+  // Set HttpOnly cookies (tokens never returned to browser)
+  const cookieStore = await cookies();
+  cookieStore.set("access_token", response.accessToken, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "strict",
+    path: "/",
+    maxAge: 15 * 60, // 15 minutes
+  });
+  cookieStore.set("refresh_token", response.refreshToken, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "strict",
+    path: "/",
+    maxAge: 7 * 24 * 60 * 60, // 7 days
+  });
+
+  redirect("/dashboard");
+}
 ```
 
 ### B. BFF → Backend Services: ConnectRPC (Internal)
 
-**Location**: `src/server/rpc-internal.ts`
+**Location**: `lib/rpc.ts`
 
-This is server-only code. The ConnectRPC clients are used exclusively by server functions:
+This is server-only code. The ConnectRPC clients are used exclusively by Server Components and Server Actions:
 
 ```typescript
-// src/server/rpc-internal.ts (SERVER-ONLY)
-import { createClient } from '@connectrpc/connect'
-import { createGrpcTransport } from '@connectrpc/connect-node'
-import { AuthService } from '@proto/auth/v1/auth_service_pb'
+// lib/rpc.ts (SERVER-ONLY)
+import { createClient } from "@connectrpc/connect";
+import { createConnectTransport } from "@connectrpc/connect-node";
+import { AuthService } from "@/proto/auth/v1/auth_service_pb";
+import { BidService } from "@/proto/bids/v1/bid_service_pb";
 
 // Direct K8s service URLs (cluster-internal)
-const AUTH_SERVICE_URL = process.env.AUTH_SERVICE_URL!
-const BID_SERVICE_URL = process.env.BID_SERVICE_URL!
+const AUTH_SERVICE_URL = process.env.AUTH_SERVICE_URL!;
+const BID_SERVICE_URL = process.env.BID_SERVICE_URL!;
 
-const authTransport = createGrpcTransport({
+const authTransport = createConnectTransport({
   baseUrl: AUTH_SERVICE_URL,
-  httpVersion: '2',
-})
+  httpVersion: "1.1",
+});
 
-export const authClient = createClient(AuthService, authTransport)
-export const bidClient = createClient(BidService, bidTransport)
+const bidTransport = createConnectTransport({
+  baseUrl: BID_SERVICE_URL,
+  httpVersion: "1.1",
+});
+
+export const authClient = createClient(AuthService, authTransport);
+export const bidClient = createClient(BidService, bidTransport);
 ```
 
 ### C. Request Types
 
 | Request Type | Flow | Token Handling |
 |--------------|------|----------------|
-| **SSR Data Fetch** | Route loader → Server Function → Backend | Read cookie, attach Bearer header |
-| **Client Mutation** | Browser → Server Function → Backend | Cookie sent automatically, server reads it |
-| **Client Query** | Browser → Server Function → Backend | Same as mutation |
+| **SSR Data Fetch** | React Server Component → Backend | Read cookie, attach Bearer header |
+| **Client Mutation** | Browser → Server Action → Backend | Cookie sent automatically, server reads it |
+| **Client Query** | Browser → Server Action → Backend | Same as mutation |
 
-### D. Migration from Direct RPC
+### D. Server Components vs Server Actions
 
-**Before (Direct Browser → Backend)**:
+| Pattern | Use Case | Example |
+|---------|----------|---------|
+| **React Server Components** | Data fetching, rendering protected pages | Dashboard, Profile, Auction list |
+| **Server Actions** | Mutations, form submissions | Login, Register, Place Bid, Logout |
+
+**RSCs for Data Fetching** (unlimited parallelism):
 ```typescript
-// src/lib/rpc.ts - Browser calls backend directly
-const authTransport = createConnectTransport({
-  baseUrl: getServiceUrl('auth'), // Was public ingress URL
-})
-export const authClient = createClient(AuthService, authTransport)
+// app/dashboard/page.tsx (Server Component - default)
+import { requireAuth } from "@/lib/auth";
+import { statsClient } from "@/lib/rpc";
 
-// Component usage
-await authClient.register({ email, password, ... })
+export default async function DashboardPage() {
+  const session = await requireAuth();
+  
+  const stats = await statsClient.getUserStats(
+    { userId: session.userId },
+    { headers: { Authorization: `Bearer ${session.accessToken}` } }
+  );
+
+  return <DashboardView stats={stats} />;
+}
 ```
 
-**After (Browser → BFF → Backend)**:
+**Server Actions for Mutations**:
 ```typescript
-// src/server/api/auth.ts - Server function wraps backend call
-export const registerFn = createServerFn({ method: 'POST' })
-  .validator(registerSchema)
-  .handler(async ({ data }) => {
-    const response = await authClient.register(data)
-    setAuthCookies(response.accessToken, response.refreshToken)
-    return { userId: response.userId }
-  })
+// app/actions/bids.ts
+"use server";
 
-// Component usage
-await registerFn({ data: { email, password, ... } })
+import { getSession } from "@/lib/auth";
+import { bidClient } from "@/lib/rpc";
+
+export async function placeBidAction(formData: FormData) {
+  const session = await getSession();
+  if (!session) {
+    return { error: "Unauthorized" };
+  }
+
+  const response = await bidClient.placeBid(
+    {
+      itemId: formData.get("itemId") as string,
+      amount: Number(formData.get("amount")),
+    },
+    { headers: { Authorization: `Bearer ${session.accessToken}` } }
+  );
+
+  return { success: true, bidId: response.bidId };
+}
 ```
 
 ## 5. Auth Flows
@@ -164,41 +216,43 @@ await registerFn({ data: { email, password, ... } })
 ### Registration
 
 1. User submits registration form in browser
-2. Browser calls `registerFn` server function
+2. Browser calls `registerAction` Server Action
 3. BFF calls `auth-service.Register` via ConnectRPC
 4. BFF calls `auth-service.Login` (or Register returns tokens directly)
 5. BFF sets HttpOnly cookies with tokens
 6. BFF returns success response (no tokens in body)
-7. Browser redirects to authenticated page
+7. Server Action redirects to authenticated page
 
 ### Login
 
 1. User submits login form in browser
-2. Browser calls `loginFn` server function
+2. Browser calls `loginAction` Server Action
 3. BFF calls `auth-service.Login` via ConnectRPC
 4. BFF sets HttpOnly cookies with tokens
 5. BFF returns success response (no tokens in body)
-6. Browser redirects to authenticated page
+6. Server Action redirects to authenticated page
 
 ### Navigate to Protected Route
 
 1. User navigates to a protected route
 2. Browser sends request with cookies
-3. BFF middleware reads `access_token` cookie
-4. If access token is expired but refresh token is valid:
-   - BFF calls `auth-service.Refresh`
-   - BFF updates cookies with new tokens
-5. BFF injects user claims into route context
-6. Route loader fetches data using server functions (with token attached)
-7. BFF returns SSR-rendered protected page
+3. Next.js middleware performs lightweight check (cookies present?)
+4. React Server Component calls `requireAuth()`:
+   - Reads `access_token` cookie
+   - If expired but `refresh_token` is valid:
+     - BFF calls `auth-service.Refresh`
+     - BFF updates cookies with new tokens
+   - If no valid tokens, redirect to `/login`
+5. RSC fetches data from backend with Bearer token
+6. BFF returns SSR-rendered protected page
 
 ### Logout
 
 1. User clicks logout
-2. Browser calls `logoutFn` server function
+2. Browser calls `logoutAction` Server Action
 3. BFF calls `auth-service.Logout` to revoke refresh token
 4. BFF clears all auth cookies
-5. Browser redirects to public page
+5. Server Action redirects to public page
 
 ## 6. Decisions & Validation
 
@@ -218,8 +272,16 @@ We have validated the BFF pattern against performance and architectural concerns
     *   **Change**: We will remove Ingresses for all backend microservices. They will become private, accessible only via the BFF within the cluster. This significantly reduces the attack surface and simplifies network configuration.
 
 4.  **Why Not ConnectRPC from Browser?**:
-    *   **Concern**: We already have ConnectRPC clients. Why add server functions?
-    *   **Decision**: Server functions provide automatic cookie handling, type safety, and work seamlessly in both SSR and client contexts. ConnectRPC is still used, but only for BFF→Backend communication where it excels (gRPC, streaming, etc.).
+    *   **Concern**: We already have ConnectRPC clients. Why add Server Actions?
+    *   **Decision**: Server Actions provide automatic cookie handling, type safety, and work seamlessly in both SSR and client contexts. ConnectRPC is still used, but only for BFF→Backend communication where it excels (gRPC, streaming, etc.).
+
+5.  **Server Actions Parallelism**:
+    *   **Concern**: Next.js limits concurrent Server Actions to 11 per client.
+    *   **Decision**: Non-issue. We use RSCs for data fetching (no limit) and reserve Server Actions for mutations only (sequential by nature).
+
+6.  **Middleware Runtime**:
+    *   **Concern**: Should we use Edge or Node.js runtime for middleware?
+    *   **Decision**: Keep middleware lightweight regardless of runtime. Token refresh happens in RSC/Server Actions, not middleware. This is more performant (refresh only when needed) and easier to debug.
 
 ## 7. Operational Details
 
@@ -227,20 +289,66 @@ We have validated the BFF pattern against performance and architectural concerns
 
 | Cookie | Attributes | TTL | Purpose |
 |--------|------------|-----|---------|
-| `__Host-access_token` | HttpOnly, Secure, SameSite=Strict, Path=/ | ~15 min | Short-lived auth token |
-| `__Host-refresh_token` | HttpOnly, Secure, SameSite=Strict, Path=/ | 7 days | Token rotation (sliding window) |
+| `access_token` | HttpOnly, Secure, SameSite=Strict, Path=/ | ~15 min | Short-lived auth token |
+| `refresh_token` | HttpOnly, Secure, SameSite=Strict, Path=/ | 7 days | Token rotation (sliding window) |
 
 **Cookie Security Notes**:
-- `__Host-` prefix enforces: Secure flag, no Domain attribute, Path must be `/`
 - `SameSite=Strict` provides CSRF protection for mutations
 - With `SameSite=Strict`, explicit CSRF tokens are not required for POST requests
 - Refresh token uses sliding window: each refresh extends the 7-day window
 - Reuse detection: if a refresh token is used after rotation, revoke all user tokens
+- `Secure` flag is enforced in production (requires HTTPS)
+- In local development, `Secure=false` to allow HTTP
+
+**Note on `__Host-` Prefix**:
+The `__Host-` prefix provides additional security guarantees but requires `Secure=true`, which doesn't work in local HTTP development. We omit the prefix and rely on our other security measures (HttpOnly, SameSite=Strict, same-origin).
+
+### Cookie Management Utility
+
+```typescript
+// lib/cookies.ts
+import { cookies } from "next/headers";
+
+const COOKIE_OPTIONS = {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === "production",
+  sameSite: "strict" as const,
+  path: "/",
+};
+
+export async function setAuthCookies(accessToken: string, refreshToken: string) {
+  const cookieStore = await cookies();
+
+  cookieStore.set("access_token", accessToken, {
+    ...COOKIE_OPTIONS,
+    maxAge: 15 * 60, // 15 minutes
+  });
+
+  cookieStore.set("refresh_token", refreshToken, {
+    ...COOKIE_OPTIONS,
+    maxAge: 7 * 24 * 60 * 60, // 7 days
+  });
+}
+
+export async function getAuthCookies() {
+  const cookieStore = await cookies();
+  return {
+    accessToken: cookieStore.get("access_token")?.value,
+    refreshToken: cookieStore.get("refresh_token")?.value,
+  };
+}
+
+export async function clearAuthCookies() {
+  const cookieStore = await cookies();
+  cookieStore.delete("access_token");
+  cookieStore.delete("refresh_token");
+}
+```
 
 ### Auth Request Handling
 
 **Browser Transport**:
-- Server functions handle cookie transmission automatically
+- Server Actions handle cookie transmission automatically
 - No `credentials: 'include'` needed—cookies are read server-side
 
 **Server/SSR Transport**:
@@ -253,15 +361,103 @@ We have validated the BFF pattern against performance and architectural concerns
   4. Retry original request once
   5. If still 401, clear cookies and return unauthorized
 
-### SSR Guard/Middleware
+### Auth Utility
 
-The `requireAuth` middleware:
-1. Reads cookies from incoming request
-2. Validates access token expiry (without calling backend)
-3. If expired, attempts refresh using refresh token
-4. Injects user claims into route context
-5. Updates response cookies if tokens were refreshed
-6. Redirects to login if authentication fails
+```typescript
+// lib/auth.ts
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
+import { authClient } from "./rpc";
+import { setAuthCookies, getAuthCookies, clearAuthCookies } from "./cookies";
+
+export async function getSession() {
+  const { accessToken, refreshToken } = await getAuthCookies();
+
+  // No tokens at all
+  if (!accessToken && !refreshToken) {
+    return null;
+  }
+
+  // Access token exists - return it (backend validates)
+  if (accessToken) {
+    return { accessToken };
+  }
+
+  // Access token expired, but refresh token exists - try refresh
+  if (refreshToken) {
+    try {
+      const response = await authClient.refresh({ refreshToken });
+      await setAuthCookies(response.accessToken, response.refreshToken);
+      return { accessToken: response.accessToken };
+    } catch {
+      // Refresh failed - clear cookies
+      await clearAuthCookies();
+      return null;
+    }
+  }
+
+  return null;
+}
+
+export async function requireAuth() {
+  const session = await getSession();
+  if (!session) {
+    redirect("/login");
+  }
+  return session;
+}
+```
+
+### Middleware (Lightweight)
+
+```typescript
+// middleware.ts
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
+
+const PROTECTED_ROUTES = ["/dashboard", "/auctions"];
+
+export function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+
+  // Check if this is a protected route
+  const isProtected = PROTECTED_ROUTES.some((route) =>
+    pathname.startsWith(route)
+  );
+
+  if (!isProtected) {
+    return NextResponse.next();
+  }
+
+  // Quick check: do we have any auth cookies?
+  const accessToken = request.cookies.get("access_token")?.value;
+  const refreshToken = request.cookies.get("refresh_token")?.value;
+
+  // No tokens at all - redirect immediately (fast path)
+  if (!accessToken && !refreshToken) {
+    const loginUrl = new URL("/login", request.url);
+    loginUrl.searchParams.set("redirect", pathname);
+    return NextResponse.redirect(loginUrl);
+  }
+
+  // Tokens exist - let the RSC handle validation/refresh
+  // This avoids making network calls in middleware
+  return NextResponse.next();
+}
+
+export const config = {
+  matcher: [
+    /*
+     * Match all request paths except:
+     * - _next/static (static files)
+     * - _next/image (image optimization)
+     * - favicon.ico, sitemap.xml, robots.txt
+     * - public files (images, etc.)
+     */
+    "/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt|.*\\.png$|.*\\.jpg$|.*\\.svg$).*)",
+  ],
+};
+```
 
 ### Network Shape
 
@@ -274,7 +470,7 @@ The `requireAuth` middleware:
 ┌─────────────────────────────────────────────────────────────────┐
 │                    NGINX Ingress                                 │
 │                    (TLS Termination)                             │
-│                    frontend.example.com                          │
+│                    app.gavel.local                               │
 └─────────────────────────┬───────────────────────────────────────┘
                           │
                           ▼
@@ -282,8 +478,9 @@ The `requireAuth` middleware:
 │                 KUBERNETES CLUSTER                               │
 │  ┌───────────────────────────────────────────────────────────┐  │
 │  │              Frontend Pod (BFF)                            │  │
-│  │              - TanStack Start SSR                          │  │
-│  │              - Server Functions                            │  │
+│  │              - Next.js App Router (SSR)                    │  │
+│  │              - React Server Components                     │  │
+│  │              - Server Actions                              │  │
 │  │              - Cookie Management                           │  │
 │  └───────────────────────┬───────────────────────────────────┘  │
 │                          │ (K8s Service DNS)                     │
@@ -355,7 +552,8 @@ BFF ──Bearer Token──▶ bid-service
 *   **Auth0**: [The Backend for Frontend Pattern](https://auth0.com/blog/backend-for-frontend-pattern-with-auth0-and-dotnet/)
 *   **OWASP**: [Local Storage Security](https://cheatsheetseries.owasp.org/cheatsheets/HTML5_Security_Cheat_Sheet.html#local-storage)
 *   **Curity**: [The Token Handler Pattern](https://curity.io/resources/learn/token-handler-pattern/)
-*   **TanStack Start**: [Server Functions](https://tanstack.com/start/latest/docs/framework/react/server-functions)
+*   **Next.js**: [Server Actions and Mutations](https://nextjs.org/docs/app/building-your-application/data-fetching/server-actions-and-mutations)
+*   **Next.js**: [Cookies API](https://nextjs.org/docs/app/api-reference/functions/cookies)
 
 ## 11. Implementation Milestones
 
@@ -364,47 +562,47 @@ BFF ──Bearer Token──▶ bid-service
 
 *   [ ] **Generate Keys**: Create RSA key pair for JWT signing (if not exists).
 *   [ ] **Auth Service Config**: Configure `auth-service` to use the private key for signing.
-*   [ ] **BFF RPC Setup**: Create `src/server/rpc-internal.ts` with ConnectRPC clients for internal backend communication.
+*   [ ] **BFF RPC Setup**: Create `lib/rpc.ts` with ConnectRPC clients for internal backend communication.
 *   [ ] **Environment Variables**: Configure `AUTH_SERVICE_URL`, `BID_SERVICE_URL`, etc., in the frontend environment.
 
 **Validation**:
 *   `auth-service` starts successfully with the private key.
-*   Frontend server starts and `rpc-internal.ts` can initialize clients (even if not connecting yet).
+*   Frontend server starts and `lib/rpc.ts` can initialize clients (even if not connecting yet).
 
 ### Milestone 2: BFF Core (Auth & Cookies)
-**Goal**: Implement server functions for Login/Register and handle HttpOnly cookies.
+**Goal**: Implement Server Actions for Login/Register and handle HttpOnly cookies.
 
-*   [ ] **Cookie Logic**: Implement `src/server/cookies.ts` (set/get/clear with `HttpOnly`, `Secure`, `SameSite=Strict`).
-*   [ ] **Auth API**: Implement `src/server/api/auth.ts`:
-    *   `loginFn`: Calls backend -> Sets cookies.
-    *   `registerFn`: Calls backend -> Sets cookies.
-    *   `logoutFn`: Calls backend (revoke) -> Clears cookies.
-*   [ ] **Frontend Forms**: Update Login and Register forms to use these server functions.
+*   [ ] **Cookie Logic**: Implement `lib/cookies.ts` (set/get/clear with `HttpOnly`, `Secure`, `SameSite=Strict`).
+*   [ ] **Auth Actions**: Implement `app/actions/auth.ts`:
+    *   `loginAction`: Calls backend -> Sets cookies -> Redirects.
+    *   `registerAction`: Calls backend -> Sets cookies -> Redirects.
+    *   `logoutAction`: Calls backend (revoke) -> Clears cookies -> Redirects.
+*   [ ] **Frontend Forms**: Update Login and Register pages to use these Server Actions.
 
 **Validation**:
 *   Login form submits successfully.
-*   Network tab shows `__Host-access_token` and `__Host-refresh_token` cookies being set.
+*   Browser DevTools shows `access_token` and `refresh_token` cookies being set.
 *   `document.cookie` in browser console is empty (cookies are HttpOnly).
 *   Logout clears the cookies.
 
 ### Milestone 3: Route Protection & SSR
 **Goal**: Protect routes and ensure authenticated state persists on reload (SSR).
 
-*   [ ] **Session Fetching**: Implement `getAuthSession` in `src/server/auth.ts` (validates token, returns user).
-*   [ ] **Route Context**: Update `__root.tsx` `beforeLoad` to populate auth context from cookies.
-*   [ ] **Token Refresh**: Implement logic to catch 401s in `getAuthSession` or middleware, call Refresh, and update cookies.
-*   [ ] **Redirects**: Add redirects to `/login` for protected routes when unauthenticated.
+*   [ ] **Auth Utility**: Implement `lib/auth.ts` with `getSession()` and `requireAuth()`.
+*   [ ] **Token Refresh**: Implement refresh logic in `getSession()` to transparently refresh expired tokens.
+*   [ ] **Middleware**: Create `middleware.ts` for lightweight auth checks and redirects.
+*   [ ] **Protected Pages**: Update dashboard and other protected pages to use `requireAuth()`.
 
 **Validation**:
 *   Accessing `/dashboard` (protected) redirects to `/login` if logged out.
 *   Refreshing the page while logged in keeps the user logged in (no flash of guest content).
-*   Manually deleting `__Host-access_token` (but keeping refresh token) results in a new access token being set transparently on the next request.
+*   Manually deleting `access_token` (but keeping refresh token) results in a new access token being set transparently on the next request.
 
 ### Milestone 4: Full Migration & Cleanup
 **Goal**: Route all remaining traffic through BFF and close public access to backends.
 
-*   [ ] **Bid/Stats API**: Create server functions for other domains (e.g., `placeBidFn`) using `rpc-internal.ts`.
-*   [ ] **Remove Client RPC**: Delete or refactor `src/lib/rpc.ts` to stop using direct browser-to-backend calls.
+*   [ ] **Bid/Stats Actions**: Create Server Actions for other domains (e.g., `placeBidAction`) using `lib/rpc.ts`.
+*   [ ] **Remove Client RPC**: Ensure no direct browser-to-backend calls exist.
 *   [ ] **Ingress Cleanup**: Remove Kubernetes Ingress resources for `auth-service`, `bid-service`, and `user-stats-service`.
 *   [ ] **Network Policy**: (Optional) Enforce network policies so backends only accept traffic from the Frontend pod.
 
@@ -412,4 +610,4 @@ BFF ──Bearer Token──▶ bid-service
 *   All app features (bidding, stats) work correctly.
 *   `curl https://auth.example.com` fails (public access blocked).
 *   `curl https://bid.example.com` fails.
-*   Only `https://frontend.example.com` is accessible.
+*   Only `https://app.gavel.local` is accessible.
