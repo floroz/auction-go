@@ -1,5 +1,5 @@
 image:
-  repository: frontend-v2
+  repository: frontend
   tag: latest
   pullPolicy: IfNotPresent
 
