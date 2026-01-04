@@ -75,21 +75,6 @@ export async function getSession(): Promise<Session | null> {
 }
 
 /**
- * Require authentication for a route
- * If user is not authenticated, redirects to /login
- * Use this in Server Components for protected routes
- */
-export async function requireAuth(
-  redirectTo: string = "/login",
-): Promise<Session> {
-  const session = await getSession();
-  if (!session) {
-    redirect(redirectTo);
-  }
-  return session;
-}
-
-/**
  * Get user information from session
  * This is a helper for pages that want to display user info
  * Returns null if not authenticated
