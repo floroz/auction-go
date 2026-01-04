@@ -20,11 +20,20 @@ import {
 import { type ActionResult } from "@/shared/types";
 
 /**
+ * Validate redirect URL to prevent open redirect attacks
+ * Only allows relative paths starting with /
+ */
+function isValidRedirect(url: string): boolean {
+  return url.startsWith("/") && !url.startsWith("//");
+}
+
+/**
  * Login Action
  * Called from the login form
  */
 export async function loginAction(
   input: LoginInput,
+  redirectTo: string = "/dashboard",
 ): Promise<ActionResult<{ userId: string }>> {
   // Validate input
   const parsed = loginInputSchema.safeParse(input);
@@ -68,8 +77,9 @@ export async function loginAction(
     };
   }
 
-  // Redirect to dashboard (must be outside try/catch)
-  redirect("/dashboard");
+  // Validate and redirect to the intended destination
+  const safeRedirect = isValidRedirect(redirectTo) ? redirectTo : "/dashboard";
+  redirect(safeRedirect);
 }
 
 /**
