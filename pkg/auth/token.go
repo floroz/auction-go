@@ -10,17 +10,41 @@ import (
 	"fmt"
 	"time"
 
+	authv1 "github.com/floroz/gavel/pkg/proto/auth/v1"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 )
 
-// Claims extends standard JWT claims with our custom fields.
+// Claims wraps the protobuf TokenClaims to implement jwt.Claims.
 type Claims struct {
-	jwt.RegisteredClaims
-	Email       string   `json:"email"`
-	FullName    string   `json:"full_name"`
-	Role        string   `json:"role"` // For future RBAC
-	Permissions []string `json:"permissions"`
+	*authv1.TokenClaims
+}
+
+// Ensure Claims implements jwt.Claims
+var _ jwt.Claims = (*Claims)(nil)
+
+func (c *Claims) GetExpirationTime() (*jwt.NumericDate, error) {
+	return jwt.NewNumericDate(time.Unix(int64(c.Exp), 0)), nil
+}
+
+func (c *Claims) GetIssuedAt() (*jwt.NumericDate, error) {
+	return jwt.NewNumericDate(time.Unix(int64(c.Iat), 0)), nil
+}
+
+func (c *Claims) GetNotBefore() (*jwt.NumericDate, error) {
+	return nil, nil
+}
+
+func (c *Claims) GetIssuer() (string, error) {
+	return c.Iss, nil
+}
+
+func (c *Claims) GetSubject() (string, error) {
+	return c.Sub, nil
+}
+
+func (c *Claims) GetAudience() (jwt.ClaimStrings, error) {
+	return nil, nil
 }
 
 // TokenPair contains both access and refresh tokens.
@@ -71,16 +95,16 @@ func (s *Signer) GenerateTokens(userID uuid.UUID, email, fullName string, permis
 	now := time.Now()
 	accessExpiry := now.Add(15 * time.Minute)
 
-	claims := Claims{
-		RegisteredClaims: jwt.RegisteredClaims{
-			Subject:   userID.String(),
-			ExpiresAt: jwt.NewNumericDate(accessExpiry),
-			IssuedAt:  jwt.NewNumericDate(now),
-			Issuer:    "gavel-auth-service",
+	claims := &Claims{
+		TokenClaims: &authv1.TokenClaims{
+			Sub:         userID.String(),
+			Email:       email,
+			FullName:    fullName,
+			Permissions: permissions,
+			Iss:         "gavel-auth-service",
+			Exp:         float64(accessExpiry.Unix()),
+			Iat:         float64(now.Unix()),
 		},
-		Email:       email,
-		FullName:    fullName,
-		Permissions: permissions,
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
@@ -104,7 +128,8 @@ func (s *Signer) GenerateTokens(userID uuid.UUID, email, fullName string, permis
 
 // ValidateToken parses and verifies the JWT signature.
 func (s *Signer) ValidateToken(tokenString string) (*Claims, error) {
-	token, err := jwt.ParseWithClaims(tokenString, &Claims{}, func(token *jwt.Token) (interface{}, error) {
+	// Initialize with empty TokenClaims to avoid nil pointer panic during unmarshal
+	token, err := jwt.ParseWithClaims(tokenString, &Claims{TokenClaims: &authv1.TokenClaims{}}, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodRSA); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}

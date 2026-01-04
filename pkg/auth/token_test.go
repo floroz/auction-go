@@ -9,6 +9,7 @@ import (
 	"testing"
 	"time"
 
+	authv1 "github.com/floroz/gavel/pkg/proto/auth/v1"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 )
@@ -64,8 +65,8 @@ func TestTokenLifecycle(t *testing.T) {
 	}
 
 	// 3. Verify Claims
-	if claims.Subject != userID.String() {
-		t.Errorf("got subject %s, want %s", claims.Subject, userID)
+	if claims.Sub != userID.String() {
+		t.Errorf("got subject %s, want %s", claims.Sub, userID)
 	}
 	if claims.Permissions[0] != "read:bids" {
 		t.Errorf("got permission %s, want read:bids", claims.Permissions[0])
@@ -77,18 +78,24 @@ func TestSecurityScenarios(t *testing.T) {
 	signer, _ := NewSigner(privPEM, pubPEM)
 
 	// Valid claims for reuse
-	validClaims := Claims{
-		RegisteredClaims: jwt.RegisteredClaims{
-			Subject:   uuid.New().String(),
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour)),
-			Issuer:    "gavel-auth-service",
+	validClaims := &Claims{
+		TokenClaims: &authv1.TokenClaims{
+			Sub:   uuid.New().String(),
+			Exp:   float64(time.Now().Add(time.Hour).Unix()),
+			Iss:   "gavel-auth-service",
+			Email: "hacker@example.com",
 		},
-		Email: "hacker@example.com",
 	}
 
 	t.Run("Rejects Expired Token", func(t *testing.T) {
-		expiredClaims := validClaims
-		expiredClaims.ExpiresAt = jwt.NewNumericDate(time.Now().Add(-1 * time.Hour))
+		expiredClaims := &Claims{
+			TokenClaims: &authv1.TokenClaims{
+				Sub:   validClaims.Sub,
+				Exp:   float64(time.Now().Add(-1 * time.Hour).Unix()),
+				Iss:   validClaims.Iss,
+				Email: validClaims.Email,
+			},
+		}
 
 		token := jwt.NewWithClaims(jwt.SigningMethodRS256, expiredClaims)
 		// We need to parse the private key manually to sign this "fake" old token

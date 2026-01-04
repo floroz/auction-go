@@ -3,9 +3,10 @@ package users
 import (
 	"context"
 
-	"github.com/floroz/gavel/pkg/events"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
+
+	"github.com/floroz/gavel/pkg/events"
 )
 
 type UserRepository interface {

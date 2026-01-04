@@ -13,6 +13,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/testcontainers/testcontainers-go/modules/rabbitmq"
 
+	pkgevents "github.com/floroz/gavel/pkg/events"
 	"github.com/floroz/gavel/pkg/testhelpers"
 	"github.com/floroz/gavel/services/bid-service/internal/adapters/events"
 	"github.com/floroz/gavel/services/bid-service/internal/domain/bids"
@@ -95,7 +96,7 @@ func TestBidEventsProducerIntegration(t *testing.T) {
 		eventID,
 		bids.EventTypeBidPlaced,
 		expectedPayload,
-		bids.OutboxStatusPending,
+		pkgevents.OutboxStatusPending,
 		time.Now(),
 	)
 	require.NoError(t, err)
@@ -116,6 +117,6 @@ func TestBidEventsProducerIntegration(t *testing.T) {
 		if err != nil {
 			return false
 		}
-		return status == string(bids.OutboxStatusPublished)
+		return status == string(pkgevents.OutboxStatusPublished)
 	}, 5*time.Second, 100*time.Millisecond, "Event status should be updated to 'published'")
 }

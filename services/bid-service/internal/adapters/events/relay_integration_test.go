@@ -17,7 +17,6 @@ import (
 	pkgevents "github.com/floroz/gavel/pkg/events"
 	"github.com/floroz/gavel/pkg/testhelpers"
 	"github.com/floroz/gavel/services/bid-service/internal/adapters/database"
-	"github.com/floroz/gavel/services/bid-service/internal/adapters/events"
 	"github.com/floroz/gavel/services/bid-service/internal/domain/bids"
 )
 
@@ -63,12 +62,13 @@ func TestRelayIntegrationWithRabbitMQ(t *testing.T) {
 	outboxRepo := database.NewPostgresOutboxRepository(dbPool)
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 
-	relay := events.NewOutboxRelay(
+	relay := pkgevents.NewOutboxRelay(
 		outboxRepo,
 		rabbitPublisher,
 		txManager,
 		10,
 		50*time.Millisecond,
+		"auction.events",
 		logger,
 	)
 
@@ -105,7 +105,7 @@ func TestRelayIntegrationWithRabbitMQ(t *testing.T) {
 		eventID,
 		bids.EventTypeBidPlaced,
 		expectedPayload,
-		bids.OutboxStatusPending,
+		pkgevents.OutboxStatusPending,
 		time.Now(),
 	)
 	require.NoError(t, err)
@@ -134,6 +134,6 @@ func TestRelayIntegrationWithRabbitMQ(t *testing.T) {
 		if err != nil {
 			return false
 		}
-		return status == string(bids.OutboxStatusPublished)
+		return status == string(pkgevents.OutboxStatusPublished)
 	}, 2*time.Second, 100*time.Millisecond, "Event status should be updated to 'published'")
 }

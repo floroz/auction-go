@@ -80,3 +80,14 @@ message GetProfileResponse {
   google.protobuf.Timestamp created_at = 6;
 }
 
+message TokenClaims {
+  string sub = 1;
+  string email = 2;
+  string full_name = 3;
+  string role = 4;
+  repeated string permissions = 5;
+  string iss = 6;
+  double exp = 7;
+  double iat = 8;
+}
+

@@ -599,6 +599,106 @@ func (x *GetProfileResponse) GetCreatedAt() *timestamppb.Timestamp {
 	return nil
 }
 
+type TokenClaims struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Sub           string                 `protobuf:"bytes,1,opt,name=sub,proto3" json:"sub,omitempty"`
+	Email         string                 `protobuf:"bytes,2,opt,name=email,proto3" json:"email,omitempty"`
+	FullName      string                 `protobuf:"bytes,3,opt,name=full_name,json=fullName,proto3" json:"full_name,omitempty"`
+	Role          string                 `protobuf:"bytes,4,opt,name=role,proto3" json:"role,omitempty"`
+	Permissions   []string               `protobuf:"bytes,5,rep,name=permissions,proto3" json:"permissions,omitempty"`
+	Iss           string                 `protobuf:"bytes,6,opt,name=iss,proto3" json:"iss,omitempty"`
+	Exp           float64                `protobuf:"fixed64,7,opt,name=exp,proto3" json:"exp,omitempty"`
+	Iat           float64                `protobuf:"fixed64,8,opt,name=iat,proto3" json:"iat,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *TokenClaims) Reset() {
+	*x = TokenClaims{}
+	mi := &file_auth_v1_auth_service_proto_msgTypes[10]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *TokenClaims) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*TokenClaims) ProtoMessage() {}
+
+func (x *TokenClaims) ProtoReflect() protoreflect.Message {
+	mi := &file_auth_v1_auth_service_proto_msgTypes[10]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use TokenClaims.ProtoReflect.Descriptor instead.
+func (*TokenClaims) Descriptor() ([]byte, []int) {
+	return file_auth_v1_auth_service_proto_rawDescGZIP(), []int{10}
+}
+
+func (x *TokenClaims) GetSub() string {
+	if x != nil {
+		return x.Sub
+	}
+	return ""
+}
+
+func (x *TokenClaims) GetEmail() string {
+	if x != nil {
+		return x.Email
+	}
+	return ""
+}
+
+func (x *TokenClaims) GetFullName() string {
+	if x != nil {
+		return x.FullName
+	}
+	return ""
+}
+
+func (x *TokenClaims) GetRole() string {
+	if x != nil {
+		return x.Role
+	}
+	return ""
+}
+
+func (x *TokenClaims) GetPermissions() []string {
+	if x != nil {
+		return x.Permissions
+	}
+	return nil
+}
+
+func (x *TokenClaims) GetIss() string {
+	if x != nil {
+		return x.Iss
+	}
+	return ""
+}
+
+func (x *TokenClaims) GetExp() float64 {
+	if x != nil {
+		return x.Exp
+	}
+	return 0
+}
+
+func (x *TokenClaims) GetIat() float64 {
+	if x != nil {
+		return x.Iat
+	}
+	return 0
+}
+
 var File_auth_v1_auth_service_proto protoreflect.FileDescriptor
 
 const file_auth_v1_auth_service_proto_rawDesc = "" +
@@ -648,7 +748,16 @@ const file_auth_v1_auth_service_proto_rawDesc = "" +
 	"avatar_url\x18\x04 \x01(\tR\tavatarUrl\x12!\n" +
 	"\fcountry_code\x18\x05 \x01(\tR\vcountryCode\x129\n" +
 	"\n" +
-	"created_at\x18\x06 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt2\xc6\x02\n" +
+	"created_at\x18\x06 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\"\xbe\x01\n" +
+	"\vTokenClaims\x12\x10\n" +
+	"\x03sub\x18\x01 \x01(\tR\x03sub\x12\x14\n" +
+	"\x05email\x18\x02 \x01(\tR\x05email\x12\x1b\n" +
+	"\tfull_name\x18\x03 \x01(\tR\bfullName\x12\x12\n" +
+	"\x04role\x18\x04 \x01(\tR\x04role\x12 \n" +
+	"\vpermissions\x18\x05 \x03(\tR\vpermissions\x12\x10\n" +
+	"\x03iss\x18\x06 \x01(\tR\x03iss\x12\x10\n" +
+	"\x03exp\x18\a \x01(\x01R\x03exp\x12\x10\n" +
+	"\x03iat\x18\b \x01(\x01R\x03iat2\xc6\x02\n" +
 	"\vAuthService\x12?\n" +
 	"\bRegister\x12\x18.auth.v1.RegisterRequest\x1a\x19.auth.v1.RegisterResponse\x126\n" +
 	"\x05Login\x12\x15.auth.v1.LoginRequest\x1a\x16.auth.v1.LoginResponse\x12<\n" +
@@ -669,7 +778,7 @@ func file_auth_v1_auth_service_proto_rawDescGZIP() []byte {
 	return file_auth_v1_auth_service_proto_rawDescData
 }
 
-var file_auth_v1_auth_service_proto_msgTypes = make([]protoimpl.MessageInfo, 10)
+var file_auth_v1_auth_service_proto_msgTypes = make([]protoimpl.MessageInfo, 11)
 var file_auth_v1_auth_service_proto_goTypes = []any{
 	(*RegisterRequest)(nil),       // 0: auth.v1.RegisterRequest
 	(*RegisterResponse)(nil),      // 1: auth.v1.RegisterResponse
@@ -681,12 +790,13 @@ var file_auth_v1_auth_service_proto_goTypes = []any{
 	(*LogoutResponse)(nil),        // 7: auth.v1.LogoutResponse
 	(*GetProfileRequest)(nil),     // 8: auth.v1.GetProfileRequest
 	(*GetProfileResponse)(nil),    // 9: auth.v1.GetProfileResponse
-	(*timestamppb.Timestamp)(nil), // 10: google.protobuf.Timestamp
+	(*TokenClaims)(nil),           // 10: auth.v1.TokenClaims
+	(*timestamppb.Timestamp)(nil), // 11: google.protobuf.Timestamp
 }
 var file_auth_v1_auth_service_proto_depIdxs = []int32{
-	10, // 0: auth.v1.LoginResponse.expires_at:type_name -> google.protobuf.Timestamp
-	10, // 1: auth.v1.RefreshResponse.expires_at:type_name -> google.protobuf.Timestamp
-	10, // 2: auth.v1.GetProfileResponse.created_at:type_name -> google.protobuf.Timestamp
+	11, // 0: auth.v1.LoginResponse.expires_at:type_name -> google.protobuf.Timestamp
+	11, // 1: auth.v1.RefreshResponse.expires_at:type_name -> google.protobuf.Timestamp
+	11, // 2: auth.v1.GetProfileResponse.created_at:type_name -> google.protobuf.Timestamp
 	0,  // 3: auth.v1.AuthService.Register:input_type -> auth.v1.RegisterRequest
 	2,  // 4: auth.v1.AuthService.Login:input_type -> auth.v1.LoginRequest
 	4,  // 5: auth.v1.AuthService.Refresh:input_type -> auth.v1.RefreshRequest
@@ -715,7 +825,7 @@ func file_auth_v1_auth_service_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_auth_v1_auth_service_proto_rawDesc), len(file_auth_v1_auth_service_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   10,
+			NumMessages:   11,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

@@ -39,7 +39,7 @@ func NewAuthInterceptor(signer *Signer) connect.UnaryInterceptorFunc {
 
 			// Inject info into context
 			ctx = context.WithValue(ctx, UserClaimsKey, claims)
-			ctx = context.WithValue(ctx, UserIDKey, claims.Subject)
+			ctx = context.WithValue(ctx, UserIDKey, claims.Sub)
 			// We will use this for the permissions check later in Phase 2
 			ctx = context.WithValue(ctx, PermissionsKey, claims.Permissions)
 
