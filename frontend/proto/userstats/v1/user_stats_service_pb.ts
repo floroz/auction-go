@@ -10,16 +10,12 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file userstats/v1/user_stats_service.proto.
  */
 export const file_userstats_v1_user_stats_service: GenFile = /*@__PURE__*/
-  fileDesc("CiV1c2Vyc3RhdHMvdjEvdXNlcl9zdGF0c19zZXJ2aWNlLnByb3RvEgx1c2Vyc3RhdHMudjEiJgoTR2V0VXNlclN0YXRzUmVxdWVzdBIPCgd1c2VyX2lkGAEgASgJIjsKEVVzZXJTdGF0c1Jlc3BvbnNlEiYKBXN0YXRzGAEgASgLMhcudXNlcnN0YXRzLnYxLlVzZXJTdGF0cyJfCglVc2VyU3RhdHMSDwoHdXNlcl9pZBgBIAEoCRISCgp0b3RhbF9iaWRzGAIgASgDEhQKDHRvdGFsX2Ftb3VudBgDIAEoAxIXCg9sYXN0X3VwZGF0ZWRfYXQYBCABKAkyZgoQVXNlclN0YXRzU2VydmljZRJSCgxHZXRVc2VyU3RhdHMSIS51c2Vyc3RhdHMudjEuR2V0VXNlclN0YXRzUmVxdWVzdBofLnVzZXJzdGF0cy52MS5Vc2VyU3RhdHNSZXNwb25zZUI8WjpnaXRodWIuY29tL2Zsb3Jvei9nYXZlbC9wa2cvcHJvdG8vdXNlcnN0YXRzL3YxO3VzZXJzdGF0c3YxYgZwcm90bzM");
+  fileDesc("CiV1c2Vyc3RhdHMvdjEvdXNlcl9zdGF0c19zZXJ2aWNlLnByb3RvEgx1c2Vyc3RhdHMudjEiFQoTR2V0VXNlclN0YXRzUmVxdWVzdCI7ChFVc2VyU3RhdHNSZXNwb25zZRImCgVzdGF0cxgBIAEoCzIXLnVzZXJzdGF0cy52MS5Vc2VyU3RhdHMiXwoJVXNlclN0YXRzEg8KB3VzZXJfaWQYASABKAkSEgoKdG90YWxfYmlkcxgCIAEoAxIUCgx0b3RhbF9hbW91bnQYAyABKAMSFwoPbGFzdF91cGRhdGVkX2F0GAQgASgJMmYKEFVzZXJTdGF0c1NlcnZpY2USUgoMR2V0VXNlclN0YXRzEiEudXNlcnN0YXRzLnYxLkdldFVzZXJTdGF0c1JlcXVlc3QaHy51c2Vyc3RhdHMudjEuVXNlclN0YXRzUmVzcG9uc2VCPFo6Z2l0aHViLmNvbS9mbG9yb3ovZ2F2ZWwvcGtnL3Byb3RvL3VzZXJzdGF0cy92MTt1c2Vyc3RhdHN2MWIGcHJvdG8z");
 
 /**
  * @generated from message userstats.v1.GetUserStatsRequest
  */
 export type GetUserStatsRequest = Message<"userstats.v1.GetUserStatsRequest"> & {
-  /**
-   * @generated from field: string user_id = 1;
-   */
-  userId: string;
 };
 
 /**

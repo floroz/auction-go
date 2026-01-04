@@ -10,7 +10,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file bids/v1/bid_service.proto.
  */
 export const file_bids_v1_bid_service: GenFile = /*@__PURE__*/
-  fileDesc("ChliaWRzL3YxL2JpZF9zZXJ2aWNlLnByb3RvEgdiaWRzLnYxIkMKD1BsYWNlQmlkUmVxdWVzdBIPCgdpdGVtX2lkGAEgASgJEg8KB3VzZXJfaWQYAiABKAkSDgoGYW1vdW50GAMgASgDIi0KEFBsYWNlQmlkUmVzcG9uc2USGQoDYmlkGAEgASgLMgwuYmlkcy52MS5CaWQiVwoDQmlkEgoKAmlkGAEgASgJEg8KB2l0ZW1faWQYAiABKAkSDwoHdXNlcl9pZBgDIAEoCRIOCgZhbW91bnQYBCABKAMSEgoKY3JlYXRlZF9hdBgFIAEoCTJNCgpCaWRTZXJ2aWNlEj8KCFBsYWNlQmlkEhguYmlkcy52MS5QbGFjZUJpZFJlcXVlc3QaGS5iaWRzLnYxLlBsYWNlQmlkUmVzcG9uc2VCMlowZ2l0aHViLmNvbS9mbG9yb3ovZ2F2ZWwvcGtnL3Byb3RvL2JpZHMvdjE7Ymlkc3YxYgZwcm90bzM");
+  fileDesc("ChliaWRzL3YxL2JpZF9zZXJ2aWNlLnByb3RvEgdiaWRzLnYxIjIKD1BsYWNlQmlkUmVxdWVzdBIPCgdpdGVtX2lkGAEgASgJEg4KBmFtb3VudBgCIAEoAyItChBQbGFjZUJpZFJlc3BvbnNlEhkKA2JpZBgBIAEoCzIMLmJpZHMudjEuQmlkIlcKA0JpZBIKCgJpZBgBIAEoCRIPCgdpdGVtX2lkGAIgASgJEg8KB3VzZXJfaWQYAyABKAkSDgoGYW1vdW50GAQgASgDEhIKCmNyZWF0ZWRfYXQYBSABKAkyTQoKQmlkU2VydmljZRI/CghQbGFjZUJpZBIYLmJpZHMudjEuUGxhY2VCaWRSZXF1ZXN0GhkuYmlkcy52MS5QbGFjZUJpZFJlc3BvbnNlQjJaMGdpdGh1Yi5jb20vZmxvcm96L2dhdmVsL3BrZy9wcm90by9iaWRzL3YxO2JpZHN2MWIGcHJvdG8z");
 
 /**
  * @generated from message bids.v1.PlaceBidRequest
@@ -22,12 +22,7 @@ export type PlaceBidRequest = Message<"bids.v1.PlaceBidRequest"> & {
   itemId: string;
 
   /**
-   * @generated from field: string user_id = 2;
-   */
-  userId: string;
-
-  /**
-   * @generated from field: int64 amount = 3;
+   * @generated from field: int64 amount = 2;
    */
   amount: bigint;
 };

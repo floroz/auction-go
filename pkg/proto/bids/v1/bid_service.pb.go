@@ -25,8 +25,7 @@ const (
 type PlaceBidRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	ItemId        string                 `protobuf:"bytes,1,opt,name=item_id,json=itemId,proto3" json:"item_id,omitempty"`
-	UserId        string                 `protobuf:"bytes,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
-	Amount        int64                  `protobuf:"varint,3,opt,name=amount,proto3" json:"amount,omitempty"`
+	Amount        int64                  `protobuf:"varint,2,opt,name=amount,proto3" json:"amount,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -64,13 +63,6 @@ func (*PlaceBidRequest) Descriptor() ([]byte, []int) {
 func (x *PlaceBidRequest) GetItemId() string {
 	if x != nil {
 		return x.ItemId
-	}
-	return ""
-}
-
-func (x *PlaceBidRequest) GetUserId() string {
-	if x != nil {
-		return x.UserId
 	}
 	return ""
 }
@@ -206,11 +198,10 @@ var File_bids_v1_bid_service_proto protoreflect.FileDescriptor
 
 const file_bids_v1_bid_service_proto_rawDesc = "" +
 	"\n" +
-	"\x19bids/v1/bid_service.proto\x12\abids.v1\"[\n" +
+	"\x19bids/v1/bid_service.proto\x12\abids.v1\"B\n" +
 	"\x0fPlaceBidRequest\x12\x17\n" +
-	"\aitem_id\x18\x01 \x01(\tR\x06itemId\x12\x17\n" +
-	"\auser_id\x18\x02 \x01(\tR\x06userId\x12\x16\n" +
-	"\x06amount\x18\x03 \x01(\x03R\x06amount\"2\n" +
+	"\aitem_id\x18\x01 \x01(\tR\x06itemId\x12\x16\n" +
+	"\x06amount\x18\x02 \x01(\x03R\x06amount\"2\n" +
 	"\x10PlaceBidResponse\x12\x1e\n" +
 	"\x03bid\x18\x01 \x01(\v2\f.bids.v1.BidR\x03bid\"~\n" +
 	"\x03Bid\x12\x0e\n" +

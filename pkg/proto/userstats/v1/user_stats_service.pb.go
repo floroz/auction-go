@@ -24,7 +24,6 @@ const (
 
 type GetUserStatsRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -57,13 +56,6 @@ func (x *GetUserStatsRequest) ProtoReflect() protoreflect.Message {
 // Deprecated: Use GetUserStatsRequest.ProtoReflect.Descriptor instead.
 func (*GetUserStatsRequest) Descriptor() ([]byte, []int) {
 	return file_userstats_v1_user_stats_service_proto_rawDescGZIP(), []int{0}
-}
-
-func (x *GetUserStatsRequest) GetUserId() string {
-	if x != nil {
-		return x.UserId
-	}
-	return ""
 }
 
 type UserStatsResponse struct {
@@ -182,9 +174,8 @@ var File_userstats_v1_user_stats_service_proto protoreflect.FileDescriptor
 
 const file_userstats_v1_user_stats_service_proto_rawDesc = "" +
 	"\n" +
-	"%userstats/v1/user_stats_service.proto\x12\fuserstats.v1\".\n" +
-	"\x13GetUserStatsRequest\x12\x17\n" +
-	"\auser_id\x18\x01 \x01(\tR\x06userId\"B\n" +
+	"%userstats/v1/user_stats_service.proto\x12\fuserstats.v1\"\x15\n" +
+	"\x13GetUserStatsRequest\"B\n" +
 	"\x11UserStatsResponse\x12-\n" +
 	"\x05stats\x18\x01 \x01(\v2\x17.userstats.v1.UserStatsR\x05stats\"\x8e\x01\n" +
 	"\tUserStats\x12\x17\n" +

@@ -9,7 +9,6 @@ service UserStatsService {
 }
 
 message GetUserStatsRequest {
-  string user_id = 1;
 }
 
 message UserStatsResponse {

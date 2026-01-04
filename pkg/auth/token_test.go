@@ -9,9 +9,10 @@ import (
 	"testing"
 	"time"
 
-	authv1 "github.com/floroz/gavel/pkg/proto/auth/v1"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
+
+	authv1 "github.com/floroz/gavel/pkg/proto/auth/v1"
 )
 
 // Helper to generate fresh keys for each test

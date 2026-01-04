@@ -10,9 +10,10 @@ import (
 	"fmt"
 	"time"
 
-	authv1 "github.com/floroz/gavel/pkg/proto/auth/v1"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
+
+	authv1 "github.com/floroz/gavel/pkg/proto/auth/v1"
 )
 
 // Claims wraps the protobuf TokenClaims to implement jwt.Claims.

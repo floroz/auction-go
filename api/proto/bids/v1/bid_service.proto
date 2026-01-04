@@ -10,8 +10,7 @@ service BidService {
 
 message PlaceBidRequest {
   string item_id = 1;
-  string user_id = 2;
-  int64 amount = 3;
+  int64 amount = 2;
 }
 
 message PlaceBidResponse {
