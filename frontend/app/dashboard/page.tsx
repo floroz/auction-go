@@ -1,10 +1,5 @@
+import { DashboardView } from "@/features/dashboard";
+
 export default async function DashboardPage() {
-  return (
-    <div className="container py-8">
-      <h1 className="text-3xl font-bold">Dashboard</h1>
-      <p className="text-muted-foreground mt-2">
-        Welcome to your dashboard. You are authenticated!
-      </p>
-    </div>
-  );
+  return <DashboardView />;
 }
