@@ -38,7 +38,7 @@ spec:
             - name: JWT_PUBLIC_KEY_PATH
               value: {{ .Values.config.jwtPublicKeyPath | quote }}
             - name: JWT_ISSUER
-              value: {{ .Values.config.jwtIssuer }}
+              value: {{ .Values.config.jwtIssuer | quote }}
           volumeMounts:
             - name: keys
               mountPath: "/app/keys"
