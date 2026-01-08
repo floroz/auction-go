@@ -32,6 +32,8 @@ spec:
               value: {{ .Values.config.userStatsServiceUrl | quote }}
             - name: JWT_PUBLIC_KEY_PATH
               value: /etc/secrets/jwt-keys/public.pem
+            - name: JWT_ISSUER
+              value: {{ .Values.config.jwtIssuer | quote }}
           volumeMounts:
             - name: jwt-keys
               mountPath: /etc/secrets/jwt-keys

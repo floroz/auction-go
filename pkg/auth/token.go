@@ -68,9 +68,19 @@ func NewSigner(privateKeyPEM, publicKeyPEM []byte, issuer string) (*Signer, erro
 	if block == nil {
 		return nil, errors.New("failed to parse private key PEM")
 	}
-	priv, err := x509.ParsePKCS1PrivateKey(block.Bytes)
+
+	// Try PKCS8 first (modern format), then fall back to PKCS1 (legacy format)
+	privKey, err := x509.ParsePKCS8PrivateKey(block.Bytes)
 	if err != nil {
-		return nil, fmt.Errorf("failed to parse private key: %w", err)
+		privKey, err = x509.ParsePKCS1PrivateKey(block.Bytes)
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse private key: %w", err)
+		}
+	}
+
+	priv, ok := privKey.(*rsa.PrivateKey)
+	if !ok {
+		return nil, errors.New("private key is not RSA")
 	}
 
 	blockPub, _ := pem.Decode(publicKeyPEM)
