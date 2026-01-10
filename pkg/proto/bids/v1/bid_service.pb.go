@@ -22,6 +22,59 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+// Item status enum
+type ItemStatus int32
+
+const (
+	ItemStatus_ITEM_STATUS_UNSPECIFIED ItemStatus = 0
+	ItemStatus_ITEM_STATUS_ACTIVE      ItemStatus = 1
+	ItemStatus_ITEM_STATUS_ENDED       ItemStatus = 2
+	ItemStatus_ITEM_STATUS_CANCELLED   ItemStatus = 3
+)
+
+// Enum value maps for ItemStatus.
+var (
+	ItemStatus_name = map[int32]string{
+		0: "ITEM_STATUS_UNSPECIFIED",
+		1: "ITEM_STATUS_ACTIVE",
+		2: "ITEM_STATUS_ENDED",
+		3: "ITEM_STATUS_CANCELLED",
+	}
+	ItemStatus_value = map[string]int32{
+		"ITEM_STATUS_UNSPECIFIED": 0,
+		"ITEM_STATUS_ACTIVE":      1,
+		"ITEM_STATUS_ENDED":       2,
+		"ITEM_STATUS_CANCELLED":   3,
+	}
+)
+
+func (x ItemStatus) Enum() *ItemStatus {
+	p := new(ItemStatus)
+	*p = x
+	return p
+}
+
+func (x ItemStatus) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (ItemStatus) Descriptor() protoreflect.EnumDescriptor {
+	return file_bids_v1_bid_service_proto_enumTypes[0].Descriptor()
+}
+
+func (ItemStatus) Type() protoreflect.EnumType {
+	return &file_bids_v1_bid_service_proto_enumTypes[0]
+}
+
+func (x ItemStatus) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use ItemStatus.Descriptor instead.
+func (ItemStatus) EnumDescriptor() ([]byte, []int) {
+	return file_bids_v1_bid_service_proto_rawDescGZIP(), []int{0}
+}
+
 type PlaceBidRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	ItemId        string                 `protobuf:"bytes,1,opt,name=item_id,json=itemId,proto3" json:"item_id,omitempty"`
@@ -194,6 +247,898 @@ func (x *Bid) GetCreatedAt() string {
 	return ""
 }
 
+// Item message
+type Item struct {
+	state             protoimpl.MessageState `protogen:"open.v1"`
+	Id                string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Title             string                 `protobuf:"bytes,2,opt,name=title,proto3" json:"title,omitempty"`
+	Description       string                 `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
+	StartPrice        int64                  `protobuf:"varint,4,opt,name=start_price,json=startPrice,proto3" json:"start_price,omitempty"`
+	CurrentHighestBid int64                  `protobuf:"varint,5,opt,name=current_highest_bid,json=currentHighestBid,proto3" json:"current_highest_bid,omitempty"`
+	EndAt             string                 `protobuf:"bytes,6,opt,name=end_at,json=endAt,proto3" json:"end_at,omitempty"`             // ISO 8601 string
+	CreatedAt         string                 `protobuf:"bytes,7,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"` // ISO 8601 string
+	UpdatedAt         string                 `protobuf:"bytes,8,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"` // ISO 8601 string
+	Images            []string               `protobuf:"bytes,9,rep,name=images,proto3" json:"images,omitempty"`
+	Category          string                 `protobuf:"bytes,10,opt,name=category,proto3" json:"category,omitempty"`
+	SellerId          string                 `protobuf:"bytes,11,opt,name=seller_id,json=sellerId,proto3" json:"seller_id,omitempty"`
+	Status            ItemStatus             `protobuf:"varint,12,opt,name=status,proto3,enum=bids.v1.ItemStatus" json:"status,omitempty"`
+	unknownFields     protoimpl.UnknownFields
+	sizeCache         protoimpl.SizeCache
+}
+
+func (x *Item) Reset() {
+	*x = Item{}
+	mi := &file_bids_v1_bid_service_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Item) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Item) ProtoMessage() {}
+
+func (x *Item) ProtoReflect() protoreflect.Message {
+	mi := &file_bids_v1_bid_service_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Item.ProtoReflect.Descriptor instead.
+func (*Item) Descriptor() ([]byte, []int) {
+	return file_bids_v1_bid_service_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *Item) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *Item) GetTitle() string {
+	if x != nil {
+		return x.Title
+	}
+	return ""
+}
+
+func (x *Item) GetDescription() string {
+	if x != nil {
+		return x.Description
+	}
+	return ""
+}
+
+func (x *Item) GetStartPrice() int64 {
+	if x != nil {
+		return x.StartPrice
+	}
+	return 0
+}
+
+func (x *Item) GetCurrentHighestBid() int64 {
+	if x != nil {
+		return x.CurrentHighestBid
+	}
+	return 0
+}
+
+func (x *Item) GetEndAt() string {
+	if x != nil {
+		return x.EndAt
+	}
+	return ""
+}
+
+func (x *Item) GetCreatedAt() string {
+	if x != nil {
+		return x.CreatedAt
+	}
+	return ""
+}
+
+func (x *Item) GetUpdatedAt() string {
+	if x != nil {
+		return x.UpdatedAt
+	}
+	return ""
+}
+
+func (x *Item) GetImages() []string {
+	if x != nil {
+		return x.Images
+	}
+	return nil
+}
+
+func (x *Item) GetCategory() string {
+	if x != nil {
+		return x.Category
+	}
+	return ""
+}
+
+func (x *Item) GetSellerId() string {
+	if x != nil {
+		return x.SellerId
+	}
+	return ""
+}
+
+func (x *Item) GetStatus() ItemStatus {
+	if x != nil {
+		return x.Status
+	}
+	return ItemStatus_ITEM_STATUS_UNSPECIFIED
+}
+
+// CreateItem
+type CreateItemRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Title         string                 `protobuf:"bytes,1,opt,name=title,proto3" json:"title,omitempty"`
+	Description   string                 `protobuf:"bytes,2,opt,name=description,proto3" json:"description,omitempty"`
+	StartPrice    int64                  `protobuf:"varint,3,opt,name=start_price,json=startPrice,proto3" json:"start_price,omitempty"`
+	EndAt         string                 `protobuf:"bytes,4,opt,name=end_at,json=endAt,proto3" json:"end_at,omitempty"` // ISO 8601 string
+	Images        []string               `protobuf:"bytes,5,rep,name=images,proto3" json:"images,omitempty"`
+	Category      string                 `protobuf:"bytes,6,opt,name=category,proto3" json:"category,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CreateItemRequest) Reset() {
+	*x = CreateItemRequest{}
+	mi := &file_bids_v1_bid_service_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateItemRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateItemRequest) ProtoMessage() {}
+
+func (x *CreateItemRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_bids_v1_bid_service_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateItemRequest.ProtoReflect.Descriptor instead.
+func (*CreateItemRequest) Descriptor() ([]byte, []int) {
+	return file_bids_v1_bid_service_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *CreateItemRequest) GetTitle() string {
+	if x != nil {
+		return x.Title
+	}
+	return ""
+}
+
+func (x *CreateItemRequest) GetDescription() string {
+	if x != nil {
+		return x.Description
+	}
+	return ""
+}
+
+func (x *CreateItemRequest) GetStartPrice() int64 {
+	if x != nil {
+		return x.StartPrice
+	}
+	return 0
+}
+
+func (x *CreateItemRequest) GetEndAt() string {
+	if x != nil {
+		return x.EndAt
+	}
+	return ""
+}
+
+func (x *CreateItemRequest) GetImages() []string {
+	if x != nil {
+		return x.Images
+	}
+	return nil
+}
+
+func (x *CreateItemRequest) GetCategory() string {
+	if x != nil {
+		return x.Category
+	}
+	return ""
+}
+
+type CreateItemResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Item          *Item                  `protobuf:"bytes,1,opt,name=item,proto3" json:"item,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CreateItemResponse) Reset() {
+	*x = CreateItemResponse{}
+	mi := &file_bids_v1_bid_service_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateItemResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateItemResponse) ProtoMessage() {}
+
+func (x *CreateItemResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_bids_v1_bid_service_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateItemResponse.ProtoReflect.Descriptor instead.
+func (*CreateItemResponse) Descriptor() ([]byte, []int) {
+	return file_bids_v1_bid_service_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *CreateItemResponse) GetItem() *Item {
+	if x != nil {
+		return x.Item
+	}
+	return nil
+}
+
+// GetItem
+type GetItemRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetItemRequest) Reset() {
+	*x = GetItemRequest{}
+	mi := &file_bids_v1_bid_service_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetItemRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetItemRequest) ProtoMessage() {}
+
+func (x *GetItemRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_bids_v1_bid_service_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetItemRequest.ProtoReflect.Descriptor instead.
+func (*GetItemRequest) Descriptor() ([]byte, []int) {
+	return file_bids_v1_bid_service_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *GetItemRequest) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+type GetItemResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Item          *Item                  `protobuf:"bytes,1,opt,name=item,proto3" json:"item,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetItemResponse) Reset() {
+	*x = GetItemResponse{}
+	mi := &file_bids_v1_bid_service_proto_msgTypes[7]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetItemResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetItemResponse) ProtoMessage() {}
+
+func (x *GetItemResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_bids_v1_bid_service_proto_msgTypes[7]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetItemResponse.ProtoReflect.Descriptor instead.
+func (*GetItemResponse) Descriptor() ([]byte, []int) {
+	return file_bids_v1_bid_service_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *GetItemResponse) GetItem() *Item {
+	if x != nil {
+		return x.Item
+	}
+	return nil
+}
+
+// ListItems
+type ListItemsRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	PageSize      int32                  `protobuf:"varint,1,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	PageToken     string                 `protobuf:"bytes,2,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`
+	Category      string                 `protobuf:"bytes,3,opt,name=category,proto3" json:"category,omitempty"` // optional filter
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListItemsRequest) Reset() {
+	*x = ListItemsRequest{}
+	mi := &file_bids_v1_bid_service_proto_msgTypes[8]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListItemsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListItemsRequest) ProtoMessage() {}
+
+func (x *ListItemsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_bids_v1_bid_service_proto_msgTypes[8]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListItemsRequest.ProtoReflect.Descriptor instead.
+func (*ListItemsRequest) Descriptor() ([]byte, []int) {
+	return file_bids_v1_bid_service_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *ListItemsRequest) GetPageSize() int32 {
+	if x != nil {
+		return x.PageSize
+	}
+	return 0
+}
+
+func (x *ListItemsRequest) GetPageToken() string {
+	if x != nil {
+		return x.PageToken
+	}
+	return ""
+}
+
+func (x *ListItemsRequest) GetCategory() string {
+	if x != nil {
+		return x.Category
+	}
+	return ""
+}
+
+type ListItemsResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Items         []*Item                `protobuf:"bytes,1,rep,name=items,proto3" json:"items,omitempty"`
+	NextPageToken string                 `protobuf:"bytes,2,opt,name=next_page_token,json=nextPageToken,proto3" json:"next_page_token,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListItemsResponse) Reset() {
+	*x = ListItemsResponse{}
+	mi := &file_bids_v1_bid_service_proto_msgTypes[9]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListItemsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListItemsResponse) ProtoMessage() {}
+
+func (x *ListItemsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_bids_v1_bid_service_proto_msgTypes[9]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListItemsResponse.ProtoReflect.Descriptor instead.
+func (*ListItemsResponse) Descriptor() ([]byte, []int) {
+	return file_bids_v1_bid_service_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *ListItemsResponse) GetItems() []*Item {
+	if x != nil {
+		return x.Items
+	}
+	return nil
+}
+
+func (x *ListItemsResponse) GetNextPageToken() string {
+	if x != nil {
+		return x.NextPageToken
+	}
+	return ""
+}
+
+// ListSellerItems
+type ListSellerItemsRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	PageSize      int32                  `protobuf:"varint,1,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	PageToken     string                 `protobuf:"bytes,2,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListSellerItemsRequest) Reset() {
+	*x = ListSellerItemsRequest{}
+	mi := &file_bids_v1_bid_service_proto_msgTypes[10]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListSellerItemsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListSellerItemsRequest) ProtoMessage() {}
+
+func (x *ListSellerItemsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_bids_v1_bid_service_proto_msgTypes[10]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListSellerItemsRequest.ProtoReflect.Descriptor instead.
+func (*ListSellerItemsRequest) Descriptor() ([]byte, []int) {
+	return file_bids_v1_bid_service_proto_rawDescGZIP(), []int{10}
+}
+
+func (x *ListSellerItemsRequest) GetPageSize() int32 {
+	if x != nil {
+		return x.PageSize
+	}
+	return 0
+}
+
+func (x *ListSellerItemsRequest) GetPageToken() string {
+	if x != nil {
+		return x.PageToken
+	}
+	return ""
+}
+
+type ListSellerItemsResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Items         []*Item                `protobuf:"bytes,1,rep,name=items,proto3" json:"items,omitempty"`
+	NextPageToken string                 `protobuf:"bytes,2,opt,name=next_page_token,json=nextPageToken,proto3" json:"next_page_token,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListSellerItemsResponse) Reset() {
+	*x = ListSellerItemsResponse{}
+	mi := &file_bids_v1_bid_service_proto_msgTypes[11]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListSellerItemsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListSellerItemsResponse) ProtoMessage() {}
+
+func (x *ListSellerItemsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_bids_v1_bid_service_proto_msgTypes[11]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListSellerItemsResponse.ProtoReflect.Descriptor instead.
+func (*ListSellerItemsResponse) Descriptor() ([]byte, []int) {
+	return file_bids_v1_bid_service_proto_rawDescGZIP(), []int{11}
+}
+
+func (x *ListSellerItemsResponse) GetItems() []*Item {
+	if x != nil {
+		return x.Items
+	}
+	return nil
+}
+
+func (x *ListSellerItemsResponse) GetNextPageToken() string {
+	if x != nil {
+		return x.NextPageToken
+	}
+	return ""
+}
+
+// UpdateItem
+type UpdateItemRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Title         *string                `protobuf:"bytes,2,opt,name=title,proto3,oneof" json:"title,omitempty"`
+	Description   *string                `protobuf:"bytes,3,opt,name=description,proto3,oneof" json:"description,omitempty"`
+	Images        []string               `protobuf:"bytes,4,rep,name=images,proto3" json:"images,omitempty"`
+	Category      *string                `protobuf:"bytes,5,opt,name=category,proto3,oneof" json:"category,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateItemRequest) Reset() {
+	*x = UpdateItemRequest{}
+	mi := &file_bids_v1_bid_service_proto_msgTypes[12]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateItemRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateItemRequest) ProtoMessage() {}
+
+func (x *UpdateItemRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_bids_v1_bid_service_proto_msgTypes[12]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateItemRequest.ProtoReflect.Descriptor instead.
+func (*UpdateItemRequest) Descriptor() ([]byte, []int) {
+	return file_bids_v1_bid_service_proto_rawDescGZIP(), []int{12}
+}
+
+func (x *UpdateItemRequest) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *UpdateItemRequest) GetTitle() string {
+	if x != nil && x.Title != nil {
+		return *x.Title
+	}
+	return ""
+}
+
+func (x *UpdateItemRequest) GetDescription() string {
+	if x != nil && x.Description != nil {
+		return *x.Description
+	}
+	return ""
+}
+
+func (x *UpdateItemRequest) GetImages() []string {
+	if x != nil {
+		return x.Images
+	}
+	return nil
+}
+
+func (x *UpdateItemRequest) GetCategory() string {
+	if x != nil && x.Category != nil {
+		return *x.Category
+	}
+	return ""
+}
+
+type UpdateItemResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Item          *Item                  `protobuf:"bytes,1,opt,name=item,proto3" json:"item,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateItemResponse) Reset() {
+	*x = UpdateItemResponse{}
+	mi := &file_bids_v1_bid_service_proto_msgTypes[13]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateItemResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateItemResponse) ProtoMessage() {}
+
+func (x *UpdateItemResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_bids_v1_bid_service_proto_msgTypes[13]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateItemResponse.ProtoReflect.Descriptor instead.
+func (*UpdateItemResponse) Descriptor() ([]byte, []int) {
+	return file_bids_v1_bid_service_proto_rawDescGZIP(), []int{13}
+}
+
+func (x *UpdateItemResponse) GetItem() *Item {
+	if x != nil {
+		return x.Item
+	}
+	return nil
+}
+
+// CancelItem
+type CancelItemRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CancelItemRequest) Reset() {
+	*x = CancelItemRequest{}
+	mi := &file_bids_v1_bid_service_proto_msgTypes[14]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CancelItemRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CancelItemRequest) ProtoMessage() {}
+
+func (x *CancelItemRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_bids_v1_bid_service_proto_msgTypes[14]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CancelItemRequest.ProtoReflect.Descriptor instead.
+func (*CancelItemRequest) Descriptor() ([]byte, []int) {
+	return file_bids_v1_bid_service_proto_rawDescGZIP(), []int{14}
+}
+
+func (x *CancelItemRequest) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+type CancelItemResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Item          *Item                  `protobuf:"bytes,1,opt,name=item,proto3" json:"item,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CancelItemResponse) Reset() {
+	*x = CancelItemResponse{}
+	mi := &file_bids_v1_bid_service_proto_msgTypes[15]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CancelItemResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CancelItemResponse) ProtoMessage() {}
+
+func (x *CancelItemResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_bids_v1_bid_service_proto_msgTypes[15]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CancelItemResponse.ProtoReflect.Descriptor instead.
+func (*CancelItemResponse) Descriptor() ([]byte, []int) {
+	return file_bids_v1_bid_service_proto_rawDescGZIP(), []int{15}
+}
+
+func (x *CancelItemResponse) GetItem() *Item {
+	if x != nil {
+		return x.Item
+	}
+	return nil
+}
+
+// GetItemBids
+type GetItemBidsRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ItemId        string                 `protobuf:"bytes,1,opt,name=item_id,json=itemId,proto3" json:"item_id,omitempty"`
+	PageSize      int32                  `protobuf:"varint,2,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	PageToken     string                 `protobuf:"bytes,3,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetItemBidsRequest) Reset() {
+	*x = GetItemBidsRequest{}
+	mi := &file_bids_v1_bid_service_proto_msgTypes[16]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetItemBidsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetItemBidsRequest) ProtoMessage() {}
+
+func (x *GetItemBidsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_bids_v1_bid_service_proto_msgTypes[16]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetItemBidsRequest.ProtoReflect.Descriptor instead.
+func (*GetItemBidsRequest) Descriptor() ([]byte, []int) {
+	return file_bids_v1_bid_service_proto_rawDescGZIP(), []int{16}
+}
+
+func (x *GetItemBidsRequest) GetItemId() string {
+	if x != nil {
+		return x.ItemId
+	}
+	return ""
+}
+
+func (x *GetItemBidsRequest) GetPageSize() int32 {
+	if x != nil {
+		return x.PageSize
+	}
+	return 0
+}
+
+func (x *GetItemBidsRequest) GetPageToken() string {
+	if x != nil {
+		return x.PageToken
+	}
+	return ""
+}
+
+type GetItemBidsResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Bids          []*Bid                 `protobuf:"bytes,1,rep,name=bids,proto3" json:"bids,omitempty"`
+	NextPageToken string                 `protobuf:"bytes,2,opt,name=next_page_token,json=nextPageToken,proto3" json:"next_page_token,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetItemBidsResponse) Reset() {
+	*x = GetItemBidsResponse{}
+	mi := &file_bids_v1_bid_service_proto_msgTypes[17]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetItemBidsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetItemBidsResponse) ProtoMessage() {}
+
+func (x *GetItemBidsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_bids_v1_bid_service_proto_msgTypes[17]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetItemBidsResponse.ProtoReflect.Descriptor instead.
+func (*GetItemBidsResponse) Descriptor() ([]byte, []int) {
+	return file_bids_v1_bid_service_proto_rawDescGZIP(), []int{17}
+}
+
+func (x *GetItemBidsResponse) GetBids() []*Bid {
+	if x != nil {
+		return x.Bids
+	}
+	return nil
+}
+
+func (x *GetItemBidsResponse) GetNextPageToken() string {
+	if x != nil {
+		return x.NextPageToken
+	}
+	return ""
+}
+
 var File_bids_v1_bid_service_proto protoreflect.FileDescriptor
 
 const file_bids_v1_bid_service_proto_rawDesc = "" +
@@ -210,10 +1155,95 @@ const file_bids_v1_bid_service_proto_rawDesc = "" +
 	"\auser_id\x18\x03 \x01(\tR\x06userId\x12\x16\n" +
 	"\x06amount\x18\x04 \x01(\x03R\x06amount\x12\x1d\n" +
 	"\n" +
-	"created_at\x18\x05 \x01(\tR\tcreatedAt2M\n" +
+	"created_at\x18\x05 \x01(\tR\tcreatedAt\"\xf2\x02\n" +
+	"\x04Item\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12\x14\n" +
+	"\x05title\x18\x02 \x01(\tR\x05title\x12 \n" +
+	"\vdescription\x18\x03 \x01(\tR\vdescription\x12\x1f\n" +
+	"\vstart_price\x18\x04 \x01(\x03R\n" +
+	"startPrice\x12.\n" +
+	"\x13current_highest_bid\x18\x05 \x01(\x03R\x11currentHighestBid\x12\x15\n" +
+	"\x06end_at\x18\x06 \x01(\tR\x05endAt\x12\x1d\n" +
+	"\n" +
+	"created_at\x18\a \x01(\tR\tcreatedAt\x12\x1d\n" +
+	"\n" +
+	"updated_at\x18\b \x01(\tR\tupdatedAt\x12\x16\n" +
+	"\x06images\x18\t \x03(\tR\x06images\x12\x1a\n" +
+	"\bcategory\x18\n" +
+	" \x01(\tR\bcategory\x12\x1b\n" +
+	"\tseller_id\x18\v \x01(\tR\bsellerId\x12+\n" +
+	"\x06status\x18\f \x01(\x0e2\x13.bids.v1.ItemStatusR\x06status\"\xb7\x01\n" +
+	"\x11CreateItemRequest\x12\x14\n" +
+	"\x05title\x18\x01 \x01(\tR\x05title\x12 \n" +
+	"\vdescription\x18\x02 \x01(\tR\vdescription\x12\x1f\n" +
+	"\vstart_price\x18\x03 \x01(\x03R\n" +
+	"startPrice\x12\x15\n" +
+	"\x06end_at\x18\x04 \x01(\tR\x05endAt\x12\x16\n" +
+	"\x06images\x18\x05 \x03(\tR\x06images\x12\x1a\n" +
+	"\bcategory\x18\x06 \x01(\tR\bcategory\"7\n" +
+	"\x12CreateItemResponse\x12!\n" +
+	"\x04item\x18\x01 \x01(\v2\r.bids.v1.ItemR\x04item\" \n" +
+	"\x0eGetItemRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\"4\n" +
+	"\x0fGetItemResponse\x12!\n" +
+	"\x04item\x18\x01 \x01(\v2\r.bids.v1.ItemR\x04item\"j\n" +
+	"\x10ListItemsRequest\x12\x1b\n" +
+	"\tpage_size\x18\x01 \x01(\x05R\bpageSize\x12\x1d\n" +
+	"\n" +
+	"page_token\x18\x02 \x01(\tR\tpageToken\x12\x1a\n" +
+	"\bcategory\x18\x03 \x01(\tR\bcategory\"`\n" +
+	"\x11ListItemsResponse\x12#\n" +
+	"\x05items\x18\x01 \x03(\v2\r.bids.v1.ItemR\x05items\x12&\n" +
+	"\x0fnext_page_token\x18\x02 \x01(\tR\rnextPageToken\"T\n" +
+	"\x16ListSellerItemsRequest\x12\x1b\n" +
+	"\tpage_size\x18\x01 \x01(\x05R\bpageSize\x12\x1d\n" +
+	"\n" +
+	"page_token\x18\x02 \x01(\tR\tpageToken\"f\n" +
+	"\x17ListSellerItemsResponse\x12#\n" +
+	"\x05items\x18\x01 \x03(\v2\r.bids.v1.ItemR\x05items\x12&\n" +
+	"\x0fnext_page_token\x18\x02 \x01(\tR\rnextPageToken\"\xc5\x01\n" +
+	"\x11UpdateItemRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12\x19\n" +
+	"\x05title\x18\x02 \x01(\tH\x00R\x05title\x88\x01\x01\x12%\n" +
+	"\vdescription\x18\x03 \x01(\tH\x01R\vdescription\x88\x01\x01\x12\x16\n" +
+	"\x06images\x18\x04 \x03(\tR\x06images\x12\x1f\n" +
+	"\bcategory\x18\x05 \x01(\tH\x02R\bcategory\x88\x01\x01B\b\n" +
+	"\x06_titleB\x0e\n" +
+	"\f_descriptionB\v\n" +
+	"\t_category\"7\n" +
+	"\x12UpdateItemResponse\x12!\n" +
+	"\x04item\x18\x01 \x01(\v2\r.bids.v1.ItemR\x04item\"#\n" +
+	"\x11CancelItemRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\"7\n" +
+	"\x12CancelItemResponse\x12!\n" +
+	"\x04item\x18\x01 \x01(\v2\r.bids.v1.ItemR\x04item\"i\n" +
+	"\x12GetItemBidsRequest\x12\x17\n" +
+	"\aitem_id\x18\x01 \x01(\tR\x06itemId\x12\x1b\n" +
+	"\tpage_size\x18\x02 \x01(\x05R\bpageSize\x12\x1d\n" +
+	"\n" +
+	"page_token\x18\x03 \x01(\tR\tpageToken\"_\n" +
+	"\x13GetItemBidsResponse\x12 \n" +
+	"\x04bids\x18\x01 \x03(\v2\f.bids.v1.BidR\x04bids\x12&\n" +
+	"\x0fnext_page_token\x18\x02 \x01(\tR\rnextPageToken*s\n" +
+	"\n" +
+	"ItemStatus\x12\x1b\n" +
+	"\x17ITEM_STATUS_UNSPECIFIED\x10\x00\x12\x16\n" +
+	"\x12ITEM_STATUS_ACTIVE\x10\x01\x12\x15\n" +
+	"\x11ITEM_STATUS_ENDED\x10\x02\x12\x19\n" +
+	"\x15ITEM_STATUS_CANCELLED\x10\x032\xc4\x04\n" +
 	"\n" +
 	"BidService\x12?\n" +
-	"\bPlaceBid\x12\x18.bids.v1.PlaceBidRequest\x1a\x19.bids.v1.PlaceBidResponseB2Z0github.com/floroz/gavel/pkg/proto/bids/v1;bidsv1b\x06proto3"
+	"\bPlaceBid\x12\x18.bids.v1.PlaceBidRequest\x1a\x19.bids.v1.PlaceBidResponse\x12E\n" +
+	"\n" +
+	"CreateItem\x12\x1a.bids.v1.CreateItemRequest\x1a\x1b.bids.v1.CreateItemResponse\x12<\n" +
+	"\aGetItem\x12\x17.bids.v1.GetItemRequest\x1a\x18.bids.v1.GetItemResponse\x12B\n" +
+	"\tListItems\x12\x19.bids.v1.ListItemsRequest\x1a\x1a.bids.v1.ListItemsResponse\x12T\n" +
+	"\x0fListSellerItems\x12\x1f.bids.v1.ListSellerItemsRequest\x1a .bids.v1.ListSellerItemsResponse\x12E\n" +
+	"\n" +
+	"UpdateItem\x12\x1a.bids.v1.UpdateItemRequest\x1a\x1b.bids.v1.UpdateItemResponse\x12E\n" +
+	"\n" +
+	"CancelItem\x12\x1a.bids.v1.CancelItemRequest\x1a\x1b.bids.v1.CancelItemResponse\x12H\n" +
+	"\vGetItemBids\x12\x1b.bids.v1.GetItemBidsRequest\x1a\x1c.bids.v1.GetItemBidsResponseB2Z0github.com/floroz/gavel/pkg/proto/bids/v1;bidsv1b\x06proto3"
 
 var (
 	file_bids_v1_bid_service_proto_rawDescOnce sync.Once
@@ -227,21 +1257,60 @@ func file_bids_v1_bid_service_proto_rawDescGZIP() []byte {
 	return file_bids_v1_bid_service_proto_rawDescData
 }
 
-var file_bids_v1_bid_service_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
+var file_bids_v1_bid_service_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
+var file_bids_v1_bid_service_proto_msgTypes = make([]protoimpl.MessageInfo, 18)
 var file_bids_v1_bid_service_proto_goTypes = []any{
-	(*PlaceBidRequest)(nil),  // 0: bids.v1.PlaceBidRequest
-	(*PlaceBidResponse)(nil), // 1: bids.v1.PlaceBidResponse
-	(*Bid)(nil),              // 2: bids.v1.Bid
+	(ItemStatus)(0),                 // 0: bids.v1.ItemStatus
+	(*PlaceBidRequest)(nil),         // 1: bids.v1.PlaceBidRequest
+	(*PlaceBidResponse)(nil),        // 2: bids.v1.PlaceBidResponse
+	(*Bid)(nil),                     // 3: bids.v1.Bid
+	(*Item)(nil),                    // 4: bids.v1.Item
+	(*CreateItemRequest)(nil),       // 5: bids.v1.CreateItemRequest
+	(*CreateItemResponse)(nil),      // 6: bids.v1.CreateItemResponse
+	(*GetItemRequest)(nil),          // 7: bids.v1.GetItemRequest
+	(*GetItemResponse)(nil),         // 8: bids.v1.GetItemResponse
+	(*ListItemsRequest)(nil),        // 9: bids.v1.ListItemsRequest
+	(*ListItemsResponse)(nil),       // 10: bids.v1.ListItemsResponse
+	(*ListSellerItemsRequest)(nil),  // 11: bids.v1.ListSellerItemsRequest
+	(*ListSellerItemsResponse)(nil), // 12: bids.v1.ListSellerItemsResponse
+	(*UpdateItemRequest)(nil),       // 13: bids.v1.UpdateItemRequest
+	(*UpdateItemResponse)(nil),      // 14: bids.v1.UpdateItemResponse
+	(*CancelItemRequest)(nil),       // 15: bids.v1.CancelItemRequest
+	(*CancelItemResponse)(nil),      // 16: bids.v1.CancelItemResponse
+	(*GetItemBidsRequest)(nil),      // 17: bids.v1.GetItemBidsRequest
+	(*GetItemBidsResponse)(nil),     // 18: bids.v1.GetItemBidsResponse
 }
 var file_bids_v1_bid_service_proto_depIdxs = []int32{
-	2, // 0: bids.v1.PlaceBidResponse.bid:type_name -> bids.v1.Bid
-	0, // 1: bids.v1.BidService.PlaceBid:input_type -> bids.v1.PlaceBidRequest
-	1, // 2: bids.v1.BidService.PlaceBid:output_type -> bids.v1.PlaceBidResponse
-	2, // [2:3] is the sub-list for method output_type
-	1, // [1:2] is the sub-list for method input_type
-	1, // [1:1] is the sub-list for extension type_name
-	1, // [1:1] is the sub-list for extension extendee
-	0, // [0:1] is the sub-list for field type_name
+	3,  // 0: bids.v1.PlaceBidResponse.bid:type_name -> bids.v1.Bid
+	0,  // 1: bids.v1.Item.status:type_name -> bids.v1.ItemStatus
+	4,  // 2: bids.v1.CreateItemResponse.item:type_name -> bids.v1.Item
+	4,  // 3: bids.v1.GetItemResponse.item:type_name -> bids.v1.Item
+	4,  // 4: bids.v1.ListItemsResponse.items:type_name -> bids.v1.Item
+	4,  // 5: bids.v1.ListSellerItemsResponse.items:type_name -> bids.v1.Item
+	4,  // 6: bids.v1.UpdateItemResponse.item:type_name -> bids.v1.Item
+	4,  // 7: bids.v1.CancelItemResponse.item:type_name -> bids.v1.Item
+	3,  // 8: bids.v1.GetItemBidsResponse.bids:type_name -> bids.v1.Bid
+	1,  // 9: bids.v1.BidService.PlaceBid:input_type -> bids.v1.PlaceBidRequest
+	5,  // 10: bids.v1.BidService.CreateItem:input_type -> bids.v1.CreateItemRequest
+	7,  // 11: bids.v1.BidService.GetItem:input_type -> bids.v1.GetItemRequest
+	9,  // 12: bids.v1.BidService.ListItems:input_type -> bids.v1.ListItemsRequest
+	11, // 13: bids.v1.BidService.ListSellerItems:input_type -> bids.v1.ListSellerItemsRequest
+	13, // 14: bids.v1.BidService.UpdateItem:input_type -> bids.v1.UpdateItemRequest
+	15, // 15: bids.v1.BidService.CancelItem:input_type -> bids.v1.CancelItemRequest
+	17, // 16: bids.v1.BidService.GetItemBids:input_type -> bids.v1.GetItemBidsRequest
+	2,  // 17: bids.v1.BidService.PlaceBid:output_type -> bids.v1.PlaceBidResponse
+	6,  // 18: bids.v1.BidService.CreateItem:output_type -> bids.v1.CreateItemResponse
+	8,  // 19: bids.v1.BidService.GetItem:output_type -> bids.v1.GetItemResponse
+	10, // 20: bids.v1.BidService.ListItems:output_type -> bids.v1.ListItemsResponse
+	12, // 21: bids.v1.BidService.ListSellerItems:output_type -> bids.v1.ListSellerItemsResponse
+	14, // 22: bids.v1.BidService.UpdateItem:output_type -> bids.v1.UpdateItemResponse
+	16, // 23: bids.v1.BidService.CancelItem:output_type -> bids.v1.CancelItemResponse
+	18, // 24: bids.v1.BidService.GetItemBids:output_type -> bids.v1.GetItemBidsResponse
+	17, // [17:25] is the sub-list for method output_type
+	9,  // [9:17] is the sub-list for method input_type
+	9,  // [9:9] is the sub-list for extension type_name
+	9,  // [9:9] is the sub-list for extension extendee
+	0,  // [0:9] is the sub-list for field type_name
 }
 
 func init() { file_bids_v1_bid_service_proto_init() }
@@ -249,18 +1318,20 @@ func file_bids_v1_bid_service_proto_init() {
 	if File_bids_v1_bid_service_proto != nil {
 		return
 	}
+	file_bids_v1_bid_service_proto_msgTypes[12].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_bids_v1_bid_service_proto_rawDesc), len(file_bids_v1_bid_service_proto_rawDesc)),
-			NumEnums:      0,
-			NumMessages:   3,
+			NumEnums:      1,
+			NumMessages:   18,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
 		GoTypes:           file_bids_v1_bid_service_proto_goTypes,
 		DependencyIndexes: file_bids_v1_bid_service_proto_depIdxs,
+		EnumInfos:         file_bids_v1_bid_service_proto_enumTypes,
 		MessageInfos:      file_bids_v1_bid_service_proto_msgTypes,
 	}.Build()
 	File_bids_v1_bid_service_proto = out.File

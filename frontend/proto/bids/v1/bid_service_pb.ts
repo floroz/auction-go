@@ -2,15 +2,15 @@
 // @generated from file bids/v1/bid_service.proto (package bids.v1, syntax proto3)
 /* eslint-disable */
 
-import type { GenFile, GenMessage, GenService } from "@bufbuild/protobuf/codegenv2";
-import { fileDesc, messageDesc, serviceDesc } from "@bufbuild/protobuf/codegenv2";
+import type { GenEnum, GenFile, GenMessage, GenService } from "@bufbuild/protobuf/codegenv2";
+import { enumDesc, fileDesc, messageDesc, serviceDesc } from "@bufbuild/protobuf/codegenv2";
 import type { Message } from "@bufbuild/protobuf";
 
 /**
  * Describes the file bids/v1/bid_service.proto.
  */
 export const file_bids_v1_bid_service: GenFile = /*@__PURE__*/
-  fileDesc("ChliaWRzL3YxL2JpZF9zZXJ2aWNlLnByb3RvEgdiaWRzLnYxIjIKD1BsYWNlQmlkUmVxdWVzdBIPCgdpdGVtX2lkGAEgASgJEg4KBmFtb3VudBgCIAEoAyItChBQbGFjZUJpZFJlc3BvbnNlEhkKA2JpZBgBIAEoCzIMLmJpZHMudjEuQmlkIlcKA0JpZBIKCgJpZBgBIAEoCRIPCgdpdGVtX2lkGAIgASgJEg8KB3VzZXJfaWQYAyABKAkSDgoGYW1vdW50GAQgASgDEhIKCmNyZWF0ZWRfYXQYBSABKAkyTQoKQmlkU2VydmljZRI/CghQbGFjZUJpZBIYLmJpZHMudjEuUGxhY2VCaWRSZXF1ZXN0GhkuYmlkcy52MS5QbGFjZUJpZFJlc3BvbnNlQjJaMGdpdGh1Yi5jb20vZmxvcm96L2dhdmVsL3BrZy9wcm90by9iaWRzL3YxO2JpZHN2MWIGcHJvdG8z");
+  fileDesc("ChliaWRzL3YxL2JpZF9zZXJ2aWNlLnByb3RvEgdiaWRzLnYxIjIKD1BsYWNlQmlkUmVxdWVzdBIPCgdpdGVtX2lkGAEgASgJEg4KBmFtb3VudBgCIAEoAyItChBQbGFjZUJpZFJlc3BvbnNlEhkKA2JpZBgBIAEoCzIMLmJpZHMudjEuQmlkIlcKA0JpZBIKCgJpZBgBIAEoCRIPCgdpdGVtX2lkGAIgASgJEg8KB3VzZXJfaWQYAyABKAkSDgoGYW1vdW50GAQgASgDEhIKCmNyZWF0ZWRfYXQYBSABKAki+gEKBEl0ZW0SCgoCaWQYASABKAkSDQoFdGl0bGUYAiABKAkSEwoLZGVzY3JpcHRpb24YAyABKAkSEwoLc3RhcnRfcHJpY2UYBCABKAMSGwoTY3VycmVudF9oaWdoZXN0X2JpZBgFIAEoAxIOCgZlbmRfYXQYBiABKAkSEgoKY3JlYXRlZF9hdBgHIAEoCRISCgp1cGRhdGVkX2F0GAggASgJEg4KBmltYWdlcxgJIAMoCRIQCghjYXRlZ29yeRgKIAEoCRIRCglzZWxsZXJfaWQYCyABKAkSIwoGc3RhdHVzGAwgASgOMhMuYmlkcy52MS5JdGVtU3RhdHVzIn4KEUNyZWF0ZUl0ZW1SZXF1ZXN0Eg0KBXRpdGxlGAEgASgJEhMKC2Rlc2NyaXB0aW9uGAIgASgJEhMKC3N0YXJ0X3ByaWNlGAMgASgDEg4KBmVuZF9hdBgEIAEoCRIOCgZpbWFnZXMYBSADKAkSEAoIY2F0ZWdvcnkYBiABKAkiMQoSQ3JlYXRlSXRlbVJlc3BvbnNlEhsKBGl0ZW0YASABKAsyDS5iaWRzLnYxLkl0ZW0iHAoOR2V0SXRlbVJlcXVlc3QSCgoCaWQYASABKAkiLgoPR2V0SXRlbVJlc3BvbnNlEhsKBGl0ZW0YASABKAsyDS5iaWRzLnYxLkl0ZW0iSwoQTGlzdEl0ZW1zUmVxdWVzdBIRCglwYWdlX3NpemUYASABKAUSEgoKcGFnZV90b2tlbhgCIAEoCRIQCghjYXRlZ29yeRgDIAEoCSJKChFMaXN0SXRlbXNSZXNwb25zZRIcCgVpdGVtcxgBIAMoCzINLmJpZHMudjEuSXRlbRIXCg9uZXh0X3BhZ2VfdG9rZW4YAiABKAkiPwoWTGlzdFNlbGxlckl0ZW1zUmVxdWVzdBIRCglwYWdlX3NpemUYASABKAUSEgoKcGFnZV90b2tlbhgCIAEoCSJQChdMaXN0U2VsbGVySXRlbXNSZXNwb25zZRIcCgVpdGVtcxgBIAMoCzINLmJpZHMudjEuSXRlbRIXCg9uZXh0X3BhZ2VfdG9rZW4YAiABKAkimwEKEVVwZGF0ZUl0ZW1SZXF1ZXN0EgoKAmlkGAEgASgJEhIKBXRpdGxlGAIgASgJSACIAQESGAoLZGVzY3JpcHRpb24YAyABKAlIAYgBARIOCgZpbWFnZXMYBCADKAkSFQoIY2F0ZWdvcnkYBSABKAlIAogBAUIICgZfdGl0bGVCDgoMX2Rlc2NyaXB0aW9uQgsKCV9jYXRlZ29yeSIxChJVcGRhdGVJdGVtUmVzcG9uc2USGwoEaXRlbRgBIAEoCzINLmJpZHMudjEuSXRlbSIfChFDYW5jZWxJdGVtUmVxdWVzdBIKCgJpZBgBIAEoCSIxChJDYW5jZWxJdGVtUmVzcG9uc2USGwoEaXRlbRgBIAEoCzINLmJpZHMudjEuSXRlbSJMChJHZXRJdGVtQmlkc1JlcXVlc3QSDwoHaXRlbV9pZBgBIAEoCRIRCglwYWdlX3NpemUYAiABKAUSEgoKcGFnZV90b2tlbhgDIAEoCSJKChNHZXRJdGVtQmlkc1Jlc3BvbnNlEhoKBGJpZHMYASADKAsyDC5iaWRzLnYxLkJpZBIXCg9uZXh0X3BhZ2VfdG9rZW4YAiABKAkqcwoKSXRlbVN0YXR1cxIbChdJVEVNX1NUQVRVU19VTlNQRUNJRklFRBAAEhYKEklURU1fU1RBVFVTX0FDVElWRRABEhUKEUlURU1fU1RBVFVTX0VOREVEEAISGQoVSVRFTV9TVEFUVVNfQ0FOQ0VMTEVEEAMyxAQKCkJpZFNlcnZpY2USPwoIUGxhY2VCaWQSGC5iaWRzLnYxLlBsYWNlQmlkUmVxdWVzdBoZLmJpZHMudjEuUGxhY2VCaWRSZXNwb25zZRJFCgpDcmVhdGVJdGVtEhouYmlkcy52MS5DcmVhdGVJdGVtUmVxdWVzdBobLmJpZHMudjEuQ3JlYXRlSXRlbVJlc3BvbnNlEjwKB0dldEl0ZW0SFy5iaWRzLnYxLkdldEl0ZW1SZXF1ZXN0GhguYmlkcy52MS5HZXRJdGVtUmVzcG9uc2USQgoJTGlzdEl0ZW1zEhkuYmlkcy52MS5MaXN0SXRlbXNSZXF1ZXN0GhouYmlkcy52MS5MaXN0SXRlbXNSZXNwb25zZRJUCg9MaXN0U2VsbGVySXRlbXMSHy5iaWRzLnYxLkxpc3RTZWxsZXJJdGVtc1JlcXVlc3QaIC5iaWRzLnYxLkxpc3RTZWxsZXJJdGVtc1Jlc3BvbnNlEkUKClVwZGF0ZUl0ZW0SGi5iaWRzLnYxLlVwZGF0ZUl0ZW1SZXF1ZXN0GhsuYmlkcy52MS5VcGRhdGVJdGVtUmVzcG9uc2USRQoKQ2FuY2VsSXRlbRIaLmJpZHMudjEuQ2FuY2VsSXRlbVJlcXVlc3QaGy5iaWRzLnYxLkNhbmNlbEl0ZW1SZXNwb25zZRJICgtHZXRJdGVtQmlkcxIbLmJpZHMudjEuR2V0SXRlbUJpZHNSZXF1ZXN0GhwuYmlkcy52MS5HZXRJdGVtQmlkc1Jlc3BvbnNlQjJaMGdpdGh1Yi5jb20vZmxvcm96L2dhdmVsL3BrZy9wcm90by9iaWRzL3YxO2JpZHN2MWIGcHJvdG8z");
 
 /**
  * @generated from message bids.v1.PlaceBidRequest
@@ -91,6 +91,460 @@ export const BidSchema: GenMessage<Bid> = /*@__PURE__*/
   messageDesc(file_bids_v1_bid_service, 2);
 
 /**
+ * Item message
+ *
+ * @generated from message bids.v1.Item
+ */
+export type Item = Message<"bids.v1.Item"> & {
+  /**
+   * @generated from field: string id = 1;
+   */
+  id: string;
+
+  /**
+   * @generated from field: string title = 2;
+   */
+  title: string;
+
+  /**
+   * @generated from field: string description = 3;
+   */
+  description: string;
+
+  /**
+   * @generated from field: int64 start_price = 4;
+   */
+  startPrice: bigint;
+
+  /**
+   * @generated from field: int64 current_highest_bid = 5;
+   */
+  currentHighestBid: bigint;
+
+  /**
+   * ISO 8601 string
+   *
+   * @generated from field: string end_at = 6;
+   */
+  endAt: string;
+
+  /**
+   * ISO 8601 string
+   *
+   * @generated from field: string created_at = 7;
+   */
+  createdAt: string;
+
+  /**
+   * ISO 8601 string
+   *
+   * @generated from field: string updated_at = 8;
+   */
+  updatedAt: string;
+
+  /**
+   * @generated from field: repeated string images = 9;
+   */
+  images: string[];
+
+  /**
+   * @generated from field: string category = 10;
+   */
+  category: string;
+
+  /**
+   * @generated from field: string seller_id = 11;
+   */
+  sellerId: string;
+
+  /**
+   * @generated from field: bids.v1.ItemStatus status = 12;
+   */
+  status: ItemStatus;
+};
+
+/**
+ * Describes the message bids.v1.Item.
+ * Use `create(ItemSchema)` to create a new message.
+ */
+export const ItemSchema: GenMessage<Item> = /*@__PURE__*/
+  messageDesc(file_bids_v1_bid_service, 3);
+
+/**
+ * CreateItem
+ *
+ * @generated from message bids.v1.CreateItemRequest
+ */
+export type CreateItemRequest = Message<"bids.v1.CreateItemRequest"> & {
+  /**
+   * @generated from field: string title = 1;
+   */
+  title: string;
+
+  /**
+   * @generated from field: string description = 2;
+   */
+  description: string;
+
+  /**
+   * @generated from field: int64 start_price = 3;
+   */
+  startPrice: bigint;
+
+  /**
+   * ISO 8601 string
+   *
+   * @generated from field: string end_at = 4;
+   */
+  endAt: string;
+
+  /**
+   * @generated from field: repeated string images = 5;
+   */
+  images: string[];
+
+  /**
+   * @generated from field: string category = 6;
+   */
+  category: string;
+};
+
+/**
+ * Describes the message bids.v1.CreateItemRequest.
+ * Use `create(CreateItemRequestSchema)` to create a new message.
+ */
+export const CreateItemRequestSchema: GenMessage<CreateItemRequest> = /*@__PURE__*/
+  messageDesc(file_bids_v1_bid_service, 4);
+
+/**
+ * @generated from message bids.v1.CreateItemResponse
+ */
+export type CreateItemResponse = Message<"bids.v1.CreateItemResponse"> & {
+  /**
+   * @generated from field: bids.v1.Item item = 1;
+   */
+  item?: Item;
+};
+
+/**
+ * Describes the message bids.v1.CreateItemResponse.
+ * Use `create(CreateItemResponseSchema)` to create a new message.
+ */
+export const CreateItemResponseSchema: GenMessage<CreateItemResponse> = /*@__PURE__*/
+  messageDesc(file_bids_v1_bid_service, 5);
+
+/**
+ * GetItem
+ *
+ * @generated from message bids.v1.GetItemRequest
+ */
+export type GetItemRequest = Message<"bids.v1.GetItemRequest"> & {
+  /**
+   * @generated from field: string id = 1;
+   */
+  id: string;
+};
+
+/**
+ * Describes the message bids.v1.GetItemRequest.
+ * Use `create(GetItemRequestSchema)` to create a new message.
+ */
+export const GetItemRequestSchema: GenMessage<GetItemRequest> = /*@__PURE__*/
+  messageDesc(file_bids_v1_bid_service, 6);
+
+/**
+ * @generated from message bids.v1.GetItemResponse
+ */
+export type GetItemResponse = Message<"bids.v1.GetItemResponse"> & {
+  /**
+   * @generated from field: bids.v1.Item item = 1;
+   */
+  item?: Item;
+};
+
+/**
+ * Describes the message bids.v1.GetItemResponse.
+ * Use `create(GetItemResponseSchema)` to create a new message.
+ */
+export const GetItemResponseSchema: GenMessage<GetItemResponse> = /*@__PURE__*/
+  messageDesc(file_bids_v1_bid_service, 7);
+
+/**
+ * ListItems
+ *
+ * @generated from message bids.v1.ListItemsRequest
+ */
+export type ListItemsRequest = Message<"bids.v1.ListItemsRequest"> & {
+  /**
+   * @generated from field: int32 page_size = 1;
+   */
+  pageSize: number;
+
+  /**
+   * @generated from field: string page_token = 2;
+   */
+  pageToken: string;
+
+  /**
+   * optional filter
+   *
+   * @generated from field: string category = 3;
+   */
+  category: string;
+};
+
+/**
+ * Describes the message bids.v1.ListItemsRequest.
+ * Use `create(ListItemsRequestSchema)` to create a new message.
+ */
+export const ListItemsRequestSchema: GenMessage<ListItemsRequest> = /*@__PURE__*/
+  messageDesc(file_bids_v1_bid_service, 8);
+
+/**
+ * @generated from message bids.v1.ListItemsResponse
+ */
+export type ListItemsResponse = Message<"bids.v1.ListItemsResponse"> & {
+  /**
+   * @generated from field: repeated bids.v1.Item items = 1;
+   */
+  items: Item[];
+
+  /**
+   * @generated from field: string next_page_token = 2;
+   */
+  nextPageToken: string;
+};
+
+/**
+ * Describes the message bids.v1.ListItemsResponse.
+ * Use `create(ListItemsResponseSchema)` to create a new message.
+ */
+export const ListItemsResponseSchema: GenMessage<ListItemsResponse> = /*@__PURE__*/
+  messageDesc(file_bids_v1_bid_service, 9);
+
+/**
+ * ListSellerItems
+ *
+ * @generated from message bids.v1.ListSellerItemsRequest
+ */
+export type ListSellerItemsRequest = Message<"bids.v1.ListSellerItemsRequest"> & {
+  /**
+   * @generated from field: int32 page_size = 1;
+   */
+  pageSize: number;
+
+  /**
+   * @generated from field: string page_token = 2;
+   */
+  pageToken: string;
+};
+
+/**
+ * Describes the message bids.v1.ListSellerItemsRequest.
+ * Use `create(ListSellerItemsRequestSchema)` to create a new message.
+ */
+export const ListSellerItemsRequestSchema: GenMessage<ListSellerItemsRequest> = /*@__PURE__*/
+  messageDesc(file_bids_v1_bid_service, 10);
+
+/**
+ * @generated from message bids.v1.ListSellerItemsResponse
+ */
+export type ListSellerItemsResponse = Message<"bids.v1.ListSellerItemsResponse"> & {
+  /**
+   * @generated from field: repeated bids.v1.Item items = 1;
+   */
+  items: Item[];
+
+  /**
+   * @generated from field: string next_page_token = 2;
+   */
+  nextPageToken: string;
+};
+
+/**
+ * Describes the message bids.v1.ListSellerItemsResponse.
+ * Use `create(ListSellerItemsResponseSchema)` to create a new message.
+ */
+export const ListSellerItemsResponseSchema: GenMessage<ListSellerItemsResponse> = /*@__PURE__*/
+  messageDesc(file_bids_v1_bid_service, 11);
+
+/**
+ * UpdateItem
+ *
+ * @generated from message bids.v1.UpdateItemRequest
+ */
+export type UpdateItemRequest = Message<"bids.v1.UpdateItemRequest"> & {
+  /**
+   * @generated from field: string id = 1;
+   */
+  id: string;
+
+  /**
+   * @generated from field: optional string title = 2;
+   */
+  title?: string;
+
+  /**
+   * @generated from field: optional string description = 3;
+   */
+  description?: string;
+
+  /**
+   * @generated from field: repeated string images = 4;
+   */
+  images: string[];
+
+  /**
+   * @generated from field: optional string category = 5;
+   */
+  category?: string;
+};
+
+/**
+ * Describes the message bids.v1.UpdateItemRequest.
+ * Use `create(UpdateItemRequestSchema)` to create a new message.
+ */
+export const UpdateItemRequestSchema: GenMessage<UpdateItemRequest> = /*@__PURE__*/
+  messageDesc(file_bids_v1_bid_service, 12);
+
+/**
+ * @generated from message bids.v1.UpdateItemResponse
+ */
+export type UpdateItemResponse = Message<"bids.v1.UpdateItemResponse"> & {
+  /**
+   * @generated from field: bids.v1.Item item = 1;
+   */
+  item?: Item;
+};
+
+/**
+ * Describes the message bids.v1.UpdateItemResponse.
+ * Use `create(UpdateItemResponseSchema)` to create a new message.
+ */
+export const UpdateItemResponseSchema: GenMessage<UpdateItemResponse> = /*@__PURE__*/
+  messageDesc(file_bids_v1_bid_service, 13);
+
+/**
+ * CancelItem
+ *
+ * @generated from message bids.v1.CancelItemRequest
+ */
+export type CancelItemRequest = Message<"bids.v1.CancelItemRequest"> & {
+  /**
+   * @generated from field: string id = 1;
+   */
+  id: string;
+};
+
+/**
+ * Describes the message bids.v1.CancelItemRequest.
+ * Use `create(CancelItemRequestSchema)` to create a new message.
+ */
+export const CancelItemRequestSchema: GenMessage<CancelItemRequest> = /*@__PURE__*/
+  messageDesc(file_bids_v1_bid_service, 14);
+
+/**
+ * @generated from message bids.v1.CancelItemResponse
+ */
+export type CancelItemResponse = Message<"bids.v1.CancelItemResponse"> & {
+  /**
+   * @generated from field: bids.v1.Item item = 1;
+   */
+  item?: Item;
+};
+
+/**
+ * Describes the message bids.v1.CancelItemResponse.
+ * Use `create(CancelItemResponseSchema)` to create a new message.
+ */
+export const CancelItemResponseSchema: GenMessage<CancelItemResponse> = /*@__PURE__*/
+  messageDesc(file_bids_v1_bid_service, 15);
+
+/**
+ * GetItemBids
+ *
+ * @generated from message bids.v1.GetItemBidsRequest
+ */
+export type GetItemBidsRequest = Message<"bids.v1.GetItemBidsRequest"> & {
+  /**
+   * @generated from field: string item_id = 1;
+   */
+  itemId: string;
+
+  /**
+   * @generated from field: int32 page_size = 2;
+   */
+  pageSize: number;
+
+  /**
+   * @generated from field: string page_token = 3;
+   */
+  pageToken: string;
+};
+
+/**
+ * Describes the message bids.v1.GetItemBidsRequest.
+ * Use `create(GetItemBidsRequestSchema)` to create a new message.
+ */
+export const GetItemBidsRequestSchema: GenMessage<GetItemBidsRequest> = /*@__PURE__*/
+  messageDesc(file_bids_v1_bid_service, 16);
+
+/**
+ * @generated from message bids.v1.GetItemBidsResponse
+ */
+export type GetItemBidsResponse = Message<"bids.v1.GetItemBidsResponse"> & {
+  /**
+   * @generated from field: repeated bids.v1.Bid bids = 1;
+   */
+  bids: Bid[];
+
+  /**
+   * @generated from field: string next_page_token = 2;
+   */
+  nextPageToken: string;
+};
+
+/**
+ * Describes the message bids.v1.GetItemBidsResponse.
+ * Use `create(GetItemBidsResponseSchema)` to create a new message.
+ */
+export const GetItemBidsResponseSchema: GenMessage<GetItemBidsResponse> = /*@__PURE__*/
+  messageDesc(file_bids_v1_bid_service, 17);
+
+/**
+ * Item status enum
+ *
+ * @generated from enum bids.v1.ItemStatus
+ */
+export enum ItemStatus {
+  /**
+   * @generated from enum value: ITEM_STATUS_UNSPECIFIED = 0;
+   */
+  UNSPECIFIED = 0,
+
+  /**
+   * @generated from enum value: ITEM_STATUS_ACTIVE = 1;
+   */
+  ACTIVE = 1,
+
+  /**
+   * @generated from enum value: ITEM_STATUS_ENDED = 2;
+   */
+  ENDED = 2,
+
+  /**
+   * @generated from enum value: ITEM_STATUS_CANCELLED = 3;
+   */
+  CANCELLED = 3,
+}
+
+/**
+ * Describes the enum bids.v1.ItemStatus.
+ */
+export const ItemStatusSchema: GenEnum<ItemStatus> = /*@__PURE__*/
+  enumDesc(file_bids_v1_bid_service, 0);
+
+/**
  * @generated from service bids.v1.BidService
  */
 export const BidService: GenService<{
@@ -101,6 +555,64 @@ export const BidService: GenService<{
     methodKind: "unary";
     input: typeof PlaceBidRequestSchema;
     output: typeof PlaceBidResponseSchema;
+  },
+  /**
+   * Item management
+   *
+   * @generated from rpc bids.v1.BidService.CreateItem
+   */
+  createItem: {
+    methodKind: "unary";
+    input: typeof CreateItemRequestSchema;
+    output: typeof CreateItemResponseSchema;
+  },
+  /**
+   * @generated from rpc bids.v1.BidService.GetItem
+   */
+  getItem: {
+    methodKind: "unary";
+    input: typeof GetItemRequestSchema;
+    output: typeof GetItemResponseSchema;
+  },
+  /**
+   * @generated from rpc bids.v1.BidService.ListItems
+   */
+  listItems: {
+    methodKind: "unary";
+    input: typeof ListItemsRequestSchema;
+    output: typeof ListItemsResponseSchema;
+  },
+  /**
+   * @generated from rpc bids.v1.BidService.ListSellerItems
+   */
+  listSellerItems: {
+    methodKind: "unary";
+    input: typeof ListSellerItemsRequestSchema;
+    output: typeof ListSellerItemsResponseSchema;
+  },
+  /**
+   * @generated from rpc bids.v1.BidService.UpdateItem
+   */
+  updateItem: {
+    methodKind: "unary";
+    input: typeof UpdateItemRequestSchema;
+    output: typeof UpdateItemResponseSchema;
+  },
+  /**
+   * @generated from rpc bids.v1.BidService.CancelItem
+   */
+  cancelItem: {
+    methodKind: "unary";
+    input: typeof CancelItemRequestSchema;
+    output: typeof CancelItemResponseSchema;
+  },
+  /**
+   * @generated from rpc bids.v1.BidService.GetItemBids
+   */
+  getItemBids: {
+    methodKind: "unary";
+    input: typeof GetItemBidsRequestSchema;
+    output: typeof GetItemBidsResponseSchema;
   },
 }> = /*@__PURE__*/
   serviceDesc(file_bids_v1_bid_service, 0);

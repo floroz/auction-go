@@ -37,11 +37,34 @@ const (
 const (
 	// BidServicePlaceBidProcedure is the fully-qualified name of the BidService's PlaceBid RPC.
 	BidServicePlaceBidProcedure = "/bids.v1.BidService/PlaceBid"
+	// BidServiceCreateItemProcedure is the fully-qualified name of the BidService's CreateItem RPC.
+	BidServiceCreateItemProcedure = "/bids.v1.BidService/CreateItem"
+	// BidServiceGetItemProcedure is the fully-qualified name of the BidService's GetItem RPC.
+	BidServiceGetItemProcedure = "/bids.v1.BidService/GetItem"
+	// BidServiceListItemsProcedure is the fully-qualified name of the BidService's ListItems RPC.
+	BidServiceListItemsProcedure = "/bids.v1.BidService/ListItems"
+	// BidServiceListSellerItemsProcedure is the fully-qualified name of the BidService's
+	// ListSellerItems RPC.
+	BidServiceListSellerItemsProcedure = "/bids.v1.BidService/ListSellerItems"
+	// BidServiceUpdateItemProcedure is the fully-qualified name of the BidService's UpdateItem RPC.
+	BidServiceUpdateItemProcedure = "/bids.v1.BidService/UpdateItem"
+	// BidServiceCancelItemProcedure is the fully-qualified name of the BidService's CancelItem RPC.
+	BidServiceCancelItemProcedure = "/bids.v1.BidService/CancelItem"
+	// BidServiceGetItemBidsProcedure is the fully-qualified name of the BidService's GetItemBids RPC.
+	BidServiceGetItemBidsProcedure = "/bids.v1.BidService/GetItemBids"
 )
 
 // BidServiceClient is a client for the bids.v1.BidService service.
 type BidServiceClient interface {
 	PlaceBid(context.Context, *connect.Request[v1.PlaceBidRequest]) (*connect.Response[v1.PlaceBidResponse], error)
+	// Item management
+	CreateItem(context.Context, *connect.Request[v1.CreateItemRequest]) (*connect.Response[v1.CreateItemResponse], error)
+	GetItem(context.Context, *connect.Request[v1.GetItemRequest]) (*connect.Response[v1.GetItemResponse], error)
+	ListItems(context.Context, *connect.Request[v1.ListItemsRequest]) (*connect.Response[v1.ListItemsResponse], error)
+	ListSellerItems(context.Context, *connect.Request[v1.ListSellerItemsRequest]) (*connect.Response[v1.ListSellerItemsResponse], error)
+	UpdateItem(context.Context, *connect.Request[v1.UpdateItemRequest]) (*connect.Response[v1.UpdateItemResponse], error)
+	CancelItem(context.Context, *connect.Request[v1.CancelItemRequest]) (*connect.Response[v1.CancelItemResponse], error)
+	GetItemBids(context.Context, *connect.Request[v1.GetItemBidsRequest]) (*connect.Response[v1.GetItemBidsResponse], error)
 }
 
 // NewBidServiceClient constructs a client for the bids.v1.BidService service. By default, it uses
@@ -61,12 +84,61 @@ func NewBidServiceClient(httpClient connect.HTTPClient, baseURL string, opts ...
 			connect.WithSchema(bidServiceMethods.ByName("PlaceBid")),
 			connect.WithClientOptions(opts...),
 		),
+		createItem: connect.NewClient[v1.CreateItemRequest, v1.CreateItemResponse](
+			httpClient,
+			baseURL+BidServiceCreateItemProcedure,
+			connect.WithSchema(bidServiceMethods.ByName("CreateItem")),
+			connect.WithClientOptions(opts...),
+		),
+		getItem: connect.NewClient[v1.GetItemRequest, v1.GetItemResponse](
+			httpClient,
+			baseURL+BidServiceGetItemProcedure,
+			connect.WithSchema(bidServiceMethods.ByName("GetItem")),
+			connect.WithClientOptions(opts...),
+		),
+		listItems: connect.NewClient[v1.ListItemsRequest, v1.ListItemsResponse](
+			httpClient,
+			baseURL+BidServiceListItemsProcedure,
+			connect.WithSchema(bidServiceMethods.ByName("ListItems")),
+			connect.WithClientOptions(opts...),
+		),
+		listSellerItems: connect.NewClient[v1.ListSellerItemsRequest, v1.ListSellerItemsResponse](
+			httpClient,
+			baseURL+BidServiceListSellerItemsProcedure,
+			connect.WithSchema(bidServiceMethods.ByName("ListSellerItems")),
+			connect.WithClientOptions(opts...),
+		),
+		updateItem: connect.NewClient[v1.UpdateItemRequest, v1.UpdateItemResponse](
+			httpClient,
+			baseURL+BidServiceUpdateItemProcedure,
+			connect.WithSchema(bidServiceMethods.ByName("UpdateItem")),
+			connect.WithClientOptions(opts...),
+		),
+		cancelItem: connect.NewClient[v1.CancelItemRequest, v1.CancelItemResponse](
+			httpClient,
+			baseURL+BidServiceCancelItemProcedure,
+			connect.WithSchema(bidServiceMethods.ByName("CancelItem")),
+			connect.WithClientOptions(opts...),
+		),
+		getItemBids: connect.NewClient[v1.GetItemBidsRequest, v1.GetItemBidsResponse](
+			httpClient,
+			baseURL+BidServiceGetItemBidsProcedure,
+			connect.WithSchema(bidServiceMethods.ByName("GetItemBids")),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
 // bidServiceClient implements BidServiceClient.
 type bidServiceClient struct {
-	placeBid *connect.Client[v1.PlaceBidRequest, v1.PlaceBidResponse]
+	placeBid        *connect.Client[v1.PlaceBidRequest, v1.PlaceBidResponse]
+	createItem      *connect.Client[v1.CreateItemRequest, v1.CreateItemResponse]
+	getItem         *connect.Client[v1.GetItemRequest, v1.GetItemResponse]
+	listItems       *connect.Client[v1.ListItemsRequest, v1.ListItemsResponse]
+	listSellerItems *connect.Client[v1.ListSellerItemsRequest, v1.ListSellerItemsResponse]
+	updateItem      *connect.Client[v1.UpdateItemRequest, v1.UpdateItemResponse]
+	cancelItem      *connect.Client[v1.CancelItemRequest, v1.CancelItemResponse]
+	getItemBids     *connect.Client[v1.GetItemBidsRequest, v1.GetItemBidsResponse]
 }
 
 // PlaceBid calls bids.v1.BidService.PlaceBid.
@@ -74,9 +146,52 @@ func (c *bidServiceClient) PlaceBid(ctx context.Context, req *connect.Request[v1
 	return c.placeBid.CallUnary(ctx, req)
 }
 
+// CreateItem calls bids.v1.BidService.CreateItem.
+func (c *bidServiceClient) CreateItem(ctx context.Context, req *connect.Request[v1.CreateItemRequest]) (*connect.Response[v1.CreateItemResponse], error) {
+	return c.createItem.CallUnary(ctx, req)
+}
+
+// GetItem calls bids.v1.BidService.GetItem.
+func (c *bidServiceClient) GetItem(ctx context.Context, req *connect.Request[v1.GetItemRequest]) (*connect.Response[v1.GetItemResponse], error) {
+	return c.getItem.CallUnary(ctx, req)
+}
+
+// ListItems calls bids.v1.BidService.ListItems.
+func (c *bidServiceClient) ListItems(ctx context.Context, req *connect.Request[v1.ListItemsRequest]) (*connect.Response[v1.ListItemsResponse], error) {
+	return c.listItems.CallUnary(ctx, req)
+}
+
+// ListSellerItems calls bids.v1.BidService.ListSellerItems.
+func (c *bidServiceClient) ListSellerItems(ctx context.Context, req *connect.Request[v1.ListSellerItemsRequest]) (*connect.Response[v1.ListSellerItemsResponse], error) {
+	return c.listSellerItems.CallUnary(ctx, req)
+}
+
+// UpdateItem calls bids.v1.BidService.UpdateItem.
+func (c *bidServiceClient) UpdateItem(ctx context.Context, req *connect.Request[v1.UpdateItemRequest]) (*connect.Response[v1.UpdateItemResponse], error) {
+	return c.updateItem.CallUnary(ctx, req)
+}
+
+// CancelItem calls bids.v1.BidService.CancelItem.
+func (c *bidServiceClient) CancelItem(ctx context.Context, req *connect.Request[v1.CancelItemRequest]) (*connect.Response[v1.CancelItemResponse], error) {
+	return c.cancelItem.CallUnary(ctx, req)
+}
+
+// GetItemBids calls bids.v1.BidService.GetItemBids.
+func (c *bidServiceClient) GetItemBids(ctx context.Context, req *connect.Request[v1.GetItemBidsRequest]) (*connect.Response[v1.GetItemBidsResponse], error) {
+	return c.getItemBids.CallUnary(ctx, req)
+}
+
 // BidServiceHandler is an implementation of the bids.v1.BidService service.
 type BidServiceHandler interface {
 	PlaceBid(context.Context, *connect.Request[v1.PlaceBidRequest]) (*connect.Response[v1.PlaceBidResponse], error)
+	// Item management
+	CreateItem(context.Context, *connect.Request[v1.CreateItemRequest]) (*connect.Response[v1.CreateItemResponse], error)
+	GetItem(context.Context, *connect.Request[v1.GetItemRequest]) (*connect.Response[v1.GetItemResponse], error)
+	ListItems(context.Context, *connect.Request[v1.ListItemsRequest]) (*connect.Response[v1.ListItemsResponse], error)
+	ListSellerItems(context.Context, *connect.Request[v1.ListSellerItemsRequest]) (*connect.Response[v1.ListSellerItemsResponse], error)
+	UpdateItem(context.Context, *connect.Request[v1.UpdateItemRequest]) (*connect.Response[v1.UpdateItemResponse], error)
+	CancelItem(context.Context, *connect.Request[v1.CancelItemRequest]) (*connect.Response[v1.CancelItemResponse], error)
+	GetItemBids(context.Context, *connect.Request[v1.GetItemBidsRequest]) (*connect.Response[v1.GetItemBidsResponse], error)
 }
 
 // NewBidServiceHandler builds an HTTP handler from the service implementation. It returns the path
@@ -92,10 +207,66 @@ func NewBidServiceHandler(svc BidServiceHandler, opts ...connect.HandlerOption) 
 		connect.WithSchema(bidServiceMethods.ByName("PlaceBid")),
 		connect.WithHandlerOptions(opts...),
 	)
+	bidServiceCreateItemHandler := connect.NewUnaryHandler(
+		BidServiceCreateItemProcedure,
+		svc.CreateItem,
+		connect.WithSchema(bidServiceMethods.ByName("CreateItem")),
+		connect.WithHandlerOptions(opts...),
+	)
+	bidServiceGetItemHandler := connect.NewUnaryHandler(
+		BidServiceGetItemProcedure,
+		svc.GetItem,
+		connect.WithSchema(bidServiceMethods.ByName("GetItem")),
+		connect.WithHandlerOptions(opts...),
+	)
+	bidServiceListItemsHandler := connect.NewUnaryHandler(
+		BidServiceListItemsProcedure,
+		svc.ListItems,
+		connect.WithSchema(bidServiceMethods.ByName("ListItems")),
+		connect.WithHandlerOptions(opts...),
+	)
+	bidServiceListSellerItemsHandler := connect.NewUnaryHandler(
+		BidServiceListSellerItemsProcedure,
+		svc.ListSellerItems,
+		connect.WithSchema(bidServiceMethods.ByName("ListSellerItems")),
+		connect.WithHandlerOptions(opts...),
+	)
+	bidServiceUpdateItemHandler := connect.NewUnaryHandler(
+		BidServiceUpdateItemProcedure,
+		svc.UpdateItem,
+		connect.WithSchema(bidServiceMethods.ByName("UpdateItem")),
+		connect.WithHandlerOptions(opts...),
+	)
+	bidServiceCancelItemHandler := connect.NewUnaryHandler(
+		BidServiceCancelItemProcedure,
+		svc.CancelItem,
+		connect.WithSchema(bidServiceMethods.ByName("CancelItem")),
+		connect.WithHandlerOptions(opts...),
+	)
+	bidServiceGetItemBidsHandler := connect.NewUnaryHandler(
+		BidServiceGetItemBidsProcedure,
+		svc.GetItemBids,
+		connect.WithSchema(bidServiceMethods.ByName("GetItemBids")),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/bids.v1.BidService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case BidServicePlaceBidProcedure:
 			bidServicePlaceBidHandler.ServeHTTP(w, r)
+		case BidServiceCreateItemProcedure:
+			bidServiceCreateItemHandler.ServeHTTP(w, r)
+		case BidServiceGetItemProcedure:
+			bidServiceGetItemHandler.ServeHTTP(w, r)
+		case BidServiceListItemsProcedure:
+			bidServiceListItemsHandler.ServeHTTP(w, r)
+		case BidServiceListSellerItemsProcedure:
+			bidServiceListSellerItemsHandler.ServeHTTP(w, r)
+		case BidServiceUpdateItemProcedure:
+			bidServiceUpdateItemHandler.ServeHTTP(w, r)
+		case BidServiceCancelItemProcedure:
+			bidServiceCancelItemHandler.ServeHTTP(w, r)
+		case BidServiceGetItemBidsProcedure:
+			bidServiceGetItemBidsHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -107,4 +278,32 @@ type UnimplementedBidServiceHandler struct{}
 
 func (UnimplementedBidServiceHandler) PlaceBid(context.Context, *connect.Request[v1.PlaceBidRequest]) (*connect.Response[v1.PlaceBidResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("bids.v1.BidService.PlaceBid is not implemented"))
+}
+
+func (UnimplementedBidServiceHandler) CreateItem(context.Context, *connect.Request[v1.CreateItemRequest]) (*connect.Response[v1.CreateItemResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("bids.v1.BidService.CreateItem is not implemented"))
+}
+
+func (UnimplementedBidServiceHandler) GetItem(context.Context, *connect.Request[v1.GetItemRequest]) (*connect.Response[v1.GetItemResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("bids.v1.BidService.GetItem is not implemented"))
+}
+
+func (UnimplementedBidServiceHandler) ListItems(context.Context, *connect.Request[v1.ListItemsRequest]) (*connect.Response[v1.ListItemsResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("bids.v1.BidService.ListItems is not implemented"))
+}
+
+func (UnimplementedBidServiceHandler) ListSellerItems(context.Context, *connect.Request[v1.ListSellerItemsRequest]) (*connect.Response[v1.ListSellerItemsResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("bids.v1.BidService.ListSellerItems is not implemented"))
+}
+
+func (UnimplementedBidServiceHandler) UpdateItem(context.Context, *connect.Request[v1.UpdateItemRequest]) (*connect.Response[v1.UpdateItemResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("bids.v1.BidService.UpdateItem is not implemented"))
+}
+
+func (UnimplementedBidServiceHandler) CancelItem(context.Context, *connect.Request[v1.CancelItemRequest]) (*connect.Response[v1.CancelItemResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("bids.v1.BidService.CancelItem is not implemented"))
+}
+
+func (UnimplementedBidServiceHandler) GetItemBids(context.Context, *connect.Request[v1.GetItemBidsRequest]) (*connect.Response[v1.GetItemBidsResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("bids.v1.BidService.GetItemBids is not implemented"))
 }
