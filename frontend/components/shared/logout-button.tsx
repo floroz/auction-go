@@ -3,10 +3,14 @@
 import { useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { logoutAction } from "@/actions/auth";
+import type { logoutAction } from "@/actions/auth";
 import { toast } from "sonner";
 
-export function LogoutButton() {
+type LogoutButtonProps = {
+  logoutAction: typeof logoutAction;
+};
+
+export function LogoutButton({ logoutAction }: LogoutButtonProps) {
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
 
